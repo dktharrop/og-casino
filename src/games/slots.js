@@ -22,6 +22,7 @@ export default async function slots (bot, username) {
   bot.busy = true
 
   if (user.balance >= user.bet && user.balance > 0) {
+    console.log(`${username} rolling slots with a bet of $${user.bet}`)
     userManager.editUser(username, 'subtract', 'balance', user.bet)
 
     bot.whisper(username, '------')
@@ -73,6 +74,7 @@ export default async function slots (bot, username) {
       await userManager.editUser(username, 'add', 'balance', winnings)
       bot.whisper(username, `$${winnings} has been added to your account`)
       bot.whisper('150cc', `${username} won $${winnings} | ${result.join(' ')}`)
+      console.log(`${username} won $${winnings} (net of ${winnings - user.bet}) | ${result.join(' ')}`)
     }
     bot.busy = false
   } else {

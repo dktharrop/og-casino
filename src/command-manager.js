@@ -49,6 +49,7 @@ function getWhisper(message) {
 function getPayment (bot, rawMsg) {
   const payMatch = rawMsg.match(/\$(\d{1,3}(?:,\d{3})*) has been received from ✪?\[[^\]]+\] (.+)\.$/)
   if (payMatch) {
+    console.log(rawMsg)
     const payment = payMatch[1]
     const paymentInteger = parseInt(payment.replace(/[^0-9]/g, ''))
     const username = payMatch[2]
@@ -109,7 +110,6 @@ function betCommand(bot, command, username) {
 }
 
 function helpCommand(bot, command, username) {
-  console.log(command, username)
   if (command.match(/^-help/) || command.match(/^-h/)) {
     const commands = [
       {commandName: '-help', arguments:'', info:'show this page'},
