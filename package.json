@@ -1,0 +1,23 @@
+{
+  "name": "og-casino",
+  "version": "0.0.1",
+  "description": "gambling",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "dharrop",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "mineflayer": "^4.14.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.50.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.28.1",
+    "eslint-plugin-n": "^16.1.0",
+    "eslint-plugin-promise": "^6.1.1"
+  }
+}
