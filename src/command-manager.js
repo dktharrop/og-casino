@@ -15,6 +15,9 @@ export default async function matchCommands(bot, jsonMsg) {
     bot.whisper(whisper.username, 'bot is busy! please wait...')
   } else if (chatMsg) {
     warningCommand(bot, chatMsg.msgContent, chatMsg.username)
+  } else if (whisper.msgContent.match(/^-/)) {
+    bot.whisper(whisper.username, 'The command prefix has been changed from - to $')
+    bot.whisper(whisper.username, 'Example: \'$help\'')
   } else {
     balCommand(bot, whisper.msgContent, whisper.username)
     await baltopCommand(bot, whisper.msgContent, whisper.username)
@@ -74,7 +77,7 @@ function getPayment (bot, rawMsg) {
 }
 
 function balCommand(bot, command, username) {
-  if (command.match(/^-bal\b/)) {
+  if (command.match(/^\$bal\b/)) {
     userManager.getUser(username).then(user => {
       bot.whisper(username, `$${user.balance}`)
     })
@@ -82,7 +85,7 @@ function balCommand(bot, command, username) {
 }
 
 async function baltopCommand(bot, command, username) {
-  if (command.match(/^-baltop/)) {
+  if (command.match(/^\$baltop/)) {
     bot.busy = true
     bot.whisper(username, 'Getting the top 10 balances...')
 
@@ -104,8 +107,8 @@ async function baltopCommand(bot, command, username) {
 }
 
 function betCommand(bot, command, username) {
-  if (command.match(/^-bet/)) {
-    const betMatch = command.match(/^-bet (\d+)/)
+  if (command.match(/^\$bet/)) {
+    const betMatch = command.match(/^\$bet (\d+)/)
     if (betMatch) {
       const newBet = Number(betMatch[1])
       if (newBet >= 100 && newBet < 10000000) {
@@ -126,31 +129,31 @@ function betCommand(bot, command, username) {
 }
 
 function coinflipCommand(bot, command, username) {
-  if (command.match(/^-cf/) || command.match(/^coinflip/)) {
+  if (command.match(/^\$cf/) || command.match(/^coinflip/)) {
     bot.whisper(username, 'Coming soon!')
   }
 }
 
 function helpCommand(bot, command, username) {
-  if (command.match(/^-help/) || command.match(/^-h/)) {
+  if (command.match(/^\$help/) || command.match(/^-h/)) {
     const commands = [
-      {commandName: '-help', arguments:'', info:'show this page'},
-      {commandName: '-bal', arguments:'user', info:'display your balance, or the balance of another user'},
-      {commandName: '-baltop', arguments:'', info:'show a list of the richest players'},
-      {commandName: '-bet', arguments:'number*', info:'view your bet, or set your bet to a number'},
-      {commandName: '-slots', arguments:'', info:'slots game'},
-      {commandName: '-coinflip', arguments:'', info:'IN DEVELOPMENT'},
-      {commandName: '-withdraw', arguments:'', info:'withdraw your funds'}
+      {commandName: 'help', arguments:'', info:'show this page'},
+      {commandName: 'bal', arguments:'user', info:'display your balance, or the balance of another user'},
+      {commandName: 'baltop', arguments:'', info:'show a list of the richest players'},
+      {commandName: 'bet', arguments:'number*', info:'view your bet, or set your bet to a number'},
+      {commandName: 'slots', arguments:'', info:'slots game'},
+      {commandName: 'coinflip', arguments:'', info:'IN DEVELOPMENT'},
+      {commandName: 'withdraw', arguments:'', info:'withdraw your funds'}
     ]
     commands.forEach((command) => {
-      bot.whisper(username, `${command.commandName} | ${command.info}`)
+      bot.whisper(username, `$${command.commandName} | ${command.info}`)
     })
     bot.whisper(username, 'Pay the bot to add funds to your account and get started!')
   }
 }
 
 async function profitCommand(bot, command, username) {
-  if (command.match(/^-profit/) && username === '150cc') {
+  if (command.match(/^\$profit/) && username === '150cc') {
     const users = await userManager.getUsers()
 
     let debt = 0;
@@ -163,29 +166,29 @@ async function profitCommand(bot, command, username) {
       if (balMatch) {
         const gross = parseInt(balMatch[1].replace(/[^0-9]/g, ''))
         const net = gross - debt
-        bot.whisper('150cc', `$${net}`)
+        bot.whisper('150cc', `$${net.toLocaleString("en-US")}`)
       }
     })
   }
 }
 
 function slotsCommand (bot, command, username) {
-  if (command.match(/^-slot/)) {
+  if (command.match(/^\$slot/)) {
     slots(bot, username)
   }
 }
 
 function warningCommand (bot, command, username) {
   console.log(`"${username}", "${command}"`)
-  if (command.match(/^-slot/)) {
+  if (command.match(/^\$slot/)) {
     console.log(`"${username}", "${command}"`)
-    bot.whisper(username, 'Please /msg the bot! All bot commands are done through private messages to avoid spam. Confused? Use -help for more info.')
+    bot.whisper(username, 'Please /msg the bot! All bot commands are done through private messages to avoid spam. Confused? Use $help for more info.')
   }
 }
 
 async function withdrawCommand(bot, command, username) { // TODO
-  if (command.match(/^-withdraw/)) {
-    const withdrawMatch = command.match(/^-withdraw (.*?)\s(\d+)/)
+  if (command.match(/^$\withdraw/)) {
+    const withdrawMatch = command.match(/^$withdraw (.*?)\s(\d+)/)
     if (withdrawMatch && username === '150cc') {
       const player = withdrawMatch[1]
       const withdrawl = withdrawMatch[2]
