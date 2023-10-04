@@ -70,7 +70,9 @@ export async function createUser (uuid) {
   const newUser = {
     uuid,
     balance: 0,
-    bet: 100
+    bet: 100,
+    gains: 0,
+    loss: 0
     // other properties
   }
 
@@ -82,3 +84,6 @@ export async function createUser (uuid) {
   return newUser
 }
 
+export async function winnings () {
+
+}

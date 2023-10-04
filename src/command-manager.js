@@ -68,7 +68,7 @@ function getMessage(message) {
   }
 }
 
-function getPayment (bot, rawMsg) {
+async function getPayment (bot, rawMsg) {
   const payMatch = rawMsg.match(/\$(\d{1,3}(?:,\d{3})*) has been received from ✪?\[[^\]]+\] (.+)\.$/)
   if (payMatch) {
     console.log(rawMsg)
@@ -77,7 +77,7 @@ function getPayment (bot, rawMsg) {
     const username = payMatch[2]
 
     bot.whisper(username, `$${payment} has been added to your account`)
-    userManager.editUser(username, 'add', 'balance', paymentInteger)
+    await userManager.editUser(username, 'add', 'balance', paymentInteger)
   } 
 }
 
@@ -111,13 +111,13 @@ async function baltopCommand(bot, command, username) {
   }
 }
 
-function betCommand(bot, command, username) {
+async function betCommand(bot, command, username) {
   if (command.match(/^\$bet/)) {
     const betMatch = command.match(/^\$bet (\d+)/)
     if (betMatch) {
       const newBet = Number(betMatch[1])
       if (newBet >= 100 && newBet < 10000000) {
-        userManager.editUser(username, 'set', 'bet', newBet)
+        await userManager.editUser(username, 'set', 'bet', newBet)
         bot.whisper(username, `Your bet has been set to $${newBet}`)
       } else if (newBet < 100) {
         bot.whisper(username, 'The minimum bet is $100!')
@@ -203,7 +203,7 @@ async function withdrawCommand(bot, command, username) { // TODO
       console.log(user)
 
       if (withdrawl > 0 && withdrawl <= user.balance) {
-        userManager.editUser(player, 'set', 'balance', user.balance - withdrawl)
+        await userManager.editUser(player, 'set', 'balance', user.balance - withdrawl)
         bot.whisper(player, `$${withdrawl} withdrawn`)
         bot.whisper(player, `Your new balance is $${user.balance - withdrawl}`)
         bot.chat(`/pay ${player} ${withdrawl}`)
