@@ -4,19 +4,22 @@ const devMode = false
 
 export default async function matchCommands(bot, jsonMsg) {
   const rawMsg = jsonMsg.toString()
+  const chatMsg = getMessage(rawMsg)
   const whisper = getWhisper(rawMsg)
   if (!whisper) {
     getPayment(bot, rawMsg)
   } else if (bot.busy) {
-    bot.whisper(whisper.username, 'bot is busy! please wait...')
+    bot.whisper(whisper.username, 'Bot is busy! Only one player can roll slots at a time to avoid the bot being spam kicked. Please wait...')
     return
   } else if (devCheck(bot, whisper.username)) {
     bot.whisper(whisper.username, 'bot is busy! please wait...')
+  } else if (chatMsg) {
+    warningCommand(bot, chatMsg.msgContent, chatMsg.username)
   } else {
     balCommand(bot, whisper.msgContent, whisper.username)
     await baltopCommand(bot, whisper.msgContent, whisper.username)
     betCommand(bot, whisper.msgContent, whisper.username)
-    // coinflipCommand()
+    coinflipCommand(bot, whisper.msgContent, whisper.username)
     helpCommand(bot, whisper.msgContent, whisper.username)
     slotsCommand(bot, whisper.msgContent, whisper.username)
     withdrawCommand(bot, whisper.msgContent, whisper.username)
@@ -39,6 +42,16 @@ function getWhisper(message) {
   const msgMatch = message.match(/^From ✪?\[[^\]]+\] ([^:]+): (.+)$/)
   if (msgMatch) {
     console.log(message)
+    return {username: msgMatch[1], msgContent: msgMatch[2]}
+  }
+  else {
+    return false
+  }
+}
+
+function getMessage(message) {
+  const msgMatch = message.match(/^\[[^\]]+\](?:.*?)? ✪?\[[^\]]+\] ([^:]+): (.+)$/)
+  if (msgMatch) {
     return {username: msgMatch[1], msgContent: msgMatch[2]}
   }
   else {
@@ -109,6 +122,12 @@ function betCommand(bot, command, username) {
   }
 }
 
+function coinflipCommand(bot, command, username) {
+  if (command.match(/^-cf/) || command.match(/^coinflip/)) {
+    bot.whisper(username, 'Coming soon!')
+  }
+}
+
 function helpCommand(bot, command, username) {
   if (command.match(/^-help/) || command.match(/^-h/)) {
     const commands = [
@@ -128,8 +147,16 @@ function helpCommand(bot, command, username) {
 }
 
 function slotsCommand (bot, command, username) {
-  if (command.match(/^-slots/)) {
+  if (command.match(/^-slot/)) {
     slots(bot, username)
+  }
+}
+
+function warningCommand (bot, command, username) {
+  console.log(`"${username}", "${command}"`)
+  if (command.match(/^-slot/)) {
+    console.log(`"${username}", "${command}"`)
+    bot.whisper(username, 'Please /msg the bot! All bot commands are done through private messages to avoid spam. Confused? Use -help for more info.')
   }
 }
 

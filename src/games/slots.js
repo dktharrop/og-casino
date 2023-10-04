@@ -66,9 +66,10 @@ export default async function slots (bot, username) {
       }
     } else if (result[0] === '⭐' || result[1] === '⭐' || result[2] === '⭐') {
       winnings = Math.floor(user.bet / 2)
-      bot.whisper(username, '1 star. Try again?')
+      bot.whisper(username, '1 star. (not in a row) Try again?')
     } else {
       bot.whisper(username, 'You lost... ☹ Try again?')
+      console.log(`${username} lost $${user.bet} | ${result.join(' ')}`)
     }
     if (winnings > 0) {
       await userManager.editUser(username, 'add', 'balance', winnings)
