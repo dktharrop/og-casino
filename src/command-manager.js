@@ -108,9 +108,11 @@ function betCommand(bot, command, username) {
     const betMatch = command.match(/^-bet (\d+)/)
     if (betMatch) {
       const newBet = Number(betMatch[1])
-      if (newBet > 0) {
+      if (newBet >= 100 && newBet < 10000000) {
         userManager.editUser(username, 'set', 'bet', newBet)
         bot.whisper(username, `Your bet has been set to $${newBet}`)
+      } else if (newBet < 100) {
+        bot.whisper(username, 'The minimum bet is $100!')
       } else {
         bot.whisper(username, 'Please enter a valid bet!')
       }
