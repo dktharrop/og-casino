@@ -1,12 +1,8 @@
 // init
 import matchCommands from './command-manager.js'
-import dotenv from 'dotenv'
 import mineflayer from 'mineflayer'
 
-dotenv.config()
-
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
-const devMode = true
 
 initBot()
 

@@ -18,6 +18,11 @@ export default async function matchCommands(bot, jsonMsg) {
   } else if (whisper.msgContent.match(/^-/)) {
     bot.whisper(whisper.username, 'The command prefix has been changed from - to $')
     bot.whisper(whisper.username, 'Example: \'$help\'')
+  } else if (whisper.username.match(/^\*/)) {
+    bot.whisper(whisper.username, 'Sorry! Bedrock players can\'t use the bot right now...')
+    bot.whisper(whisper.username, 'This is because bedrock playres don\'t have java UUIDs, so I can\'t store their data properly')
+    bot.whisper(whisper.username, 'Addotonally, bedrock does not properly display the emoji used by the bot.')
+    console.log(`${whisper.username} just learned that bedrockers are second class citizens...`)
   } else {
     balCommand(bot, whisper.msgContent, whisper.username)
     await baltopCommand(bot, whisper.msgContent, whisper.username)
@@ -187,8 +192,8 @@ function warningCommand (bot, command, username) {
 }
 
 async function withdrawCommand(bot, command, username) { // TODO
-  if (command.match(/^$\withdraw/)) {
-    const withdrawMatch = command.match(/^$withdraw (.*?)\s(\d+)/)
+  if (command.match(/^\$withdraw/)) {
+    const withdrawMatch = command.match(/^\$withdraw (.*?)\s(\d+)/)
     if (withdrawMatch && username === '150cc') {
       const player = withdrawMatch[1]
       const withdrawl = withdrawMatch[2]
