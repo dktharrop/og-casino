@@ -21,6 +21,7 @@ export default async function matchCommands(bot, jsonMsg) {
     betCommand(bot, whisper.msgContent, whisper.username)
     coinflipCommand(bot, whisper.msgContent, whisper.username)
     helpCommand(bot, whisper.msgContent, whisper.username)
+    await profitCommand(bot, whisper.msgContent, whisper.username)
     slotsCommand(bot, whisper.msgContent, whisper.username)
     withdrawCommand(bot, whisper.msgContent, whisper.username)
   }
@@ -143,6 +144,26 @@ function helpCommand(bot, command, username) {
       bot.whisper(username, `${command.commandName} | ${command.info}`)
     })
     bot.whisper(username, 'Pay the bot to add funds to your account and get started!')
+  }
+}
+
+async function profitCommand(bot, command, username) {
+  if (command.match(/^-profit/) && username === '150cc') {
+    const users = await userManager.getUsers()
+
+    let debt = 0;
+    for (let i = 0; i < users.length; i++) {
+      debt += users[i].balance
+    }
+    bot.chat('/bal')
+    bot.once('messagestr', (message) => {
+      const balMatch = message.match(/^Balance: \$(\d{1,3}(?:,\d{3})*)/)
+      if (balMatch) {
+        const gross = parseInt(balMatch[1].replace(/[^0-9]/g, ''))
+        const net = gross - debt
+        bot.whisper('150cc', `$${net}`)
+      }
+    })
   }
 }
 
