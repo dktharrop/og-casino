@@ -83,7 +83,3 @@ export async function createUser (uuid) {
 
   return newUser
 }
-
-export async function winnings () {
-
-}

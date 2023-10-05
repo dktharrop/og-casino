@@ -10,17 +10,16 @@ initBot()
 function initBot () {
   const bot = mineflayer.createBot(
     {
-      username: process.env.USERNAME,
+      username: 'dharropalt1.7tons@slmail.me',
       auth: 'microsoft',
       host: 'og-network.net',
       port: '25565',
       version: '1.20',
       viewDistance: 3,
       autoJoinSMP: true,
-      busy: false,
       hideErrors: true,
     })
-
+    bot.queue = []
   initEvents(bot)
 }
 
@@ -76,4 +75,16 @@ async function joinSMP (bot) {
       }
     }
   })
+}
+
+export function editQueue(bot, username, command, editType) {
+  queueInfo = { username, command }
+  if (editType === 'add') {
+    bot.queue.push(queueInfo)
+  } else {
+    let index = bot.queue.indexOf(queueInfo);
+    if (index !== -1) {
+      bot.queue.splice(index, 1);
+    }
+  }
 }

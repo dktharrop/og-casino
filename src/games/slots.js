@@ -19,8 +19,6 @@ export default async function slots (bot, username) {
   const user = await userManager.getUser(username)
   const result = []
 
-  bot.busy = true
-
   if (user.balance >= user.bet && user.balance > 0) {
     console.log(`${username} rolling slots with a bet of $${user.bet}`)
     await userManager.editUser(username, 'subtract', 'balance', user.bet)
@@ -79,11 +77,9 @@ export default async function slots (bot, username) {
       bot.whisper('150cc', `${username} won $${winnings} | ${result.join(' ')}`)
       console.log(`${username} won $${winnings} (net of ${winnings - user.bet}) | ${result.join(' ')}`)
     }
-    bot.busy = false
   } else {
     bot.chat(`/msg ${username} You can't afford the bet!`)
     bot.chat(`/msg ${username} Please lower the bet or /pay the bot to add funds`)
     bot.chat(`/msg ${username} You can check your balance with -bal, and bet with -bet`)
-    bot.busy = false
   }
-} // people couldve cheated it by chaning the bet during the roll
+}

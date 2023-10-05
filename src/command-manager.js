@@ -1,16 +1,16 @@
 import * as userManager from './user-manager.js'
 import slots from './games/slots.js'
+import * as botFunctions from './main.js'
+
 const devMode = false
 
 export default async function matchCommands(bot, jsonMsg) {
+  console.log(bot.queue)
   const rawMsg = jsonMsg.toString()
   const chatMsg = getMessage(rawMsg)
   const whisper = getWhisper(rawMsg)
   if (!whisper) {
     getPayment(bot, rawMsg)
-  } else if (bot.busy) {
-    bot.whisper(whisper.username, 'Bot is busy! Only one player can roll slots at a time to avoid the bot being spam kicked. Please wait...')
-    return
   } else if (devCheck(bot, whisper.username)) {
     bot.whisper(whisper.username, 'bot is busy! please wait...')
   } else if (chatMsg) {
@@ -23,15 +23,21 @@ export default async function matchCommands(bot, jsonMsg) {
     bot.whisper(whisper.username, 'This is because bedrock playres don\'t have java UUIDs, so I can\'t store their data properly')
     bot.whisper(whisper.username, 'Addotonally, bedrock does not properly display the emoji used by the bot.')
     console.log(`${whisper.username} just learned that bedrockers are second class citizens...`)
-  } else {
+  } else if (bot.queue == []) {
     balCommand(bot, whisper.msgContent, whisper.username)
     await baltopCommand(bot, whisper.msgContent, whisper.username)
     betCommand(bot, whisper.msgContent, whisper.username)
     coinflipCommand(bot, whisper.msgContent, whisper.username)
     helpCommand(bot, whisper.msgContent, whisper.username)
     await profitCommand(bot, whisper.msgContent, whisper.username)
-    slotsCommand(bot, whisper.msgContent, whisper.username)
+    await slotsCommand(bot, whisper.msgContent, whisper.username)
     withdrawCommand(bot, whisper.msgContent, whisper.username)
+    botFunctions.removeQueue(bot, whisper.username)
+  } else if (bot.queue.includes(whisper.username)) {
+    bot.whisper(username, 'Please wait in queue!')
+  } else {
+    botFunctions.addQueue(bot, whisper.username)
+    bot.whisper(whisper.username, 'Added to queue!')
   }
 }
 
@@ -91,7 +97,6 @@ function balCommand(bot, command, username) {
 
 async function baltopCommand(bot, command, username) {
   if (command.match(/^\$baltop/)) {
-    bot.busy = true
     bot.whisper(username, 'Getting the top 10 balances...')
 
     const users = await userManager.getUsers()
@@ -107,7 +112,6 @@ async function baltopCommand(bot, command, username) {
     for (let i = 0; i < top10.length; i++) {
       bot.whisper(username, `${usernames[i]}: $${top10[i].balance}`)
     }
-    bot.busy = false
   }
 }
 
@@ -116,7 +120,7 @@ async function betCommand(bot, command, username) {
     const betMatch = command.match(/^\$bet (\d+)/)
     if (betMatch) {
       const newBet = Number(betMatch[1])
-      if (newBet >= 100 && newBet < 10000000) {
+      if (newBet >= 100 && newBet < 1000000) {
         await userManager.editUser(username, 'set', 'bet', newBet)
         bot.whisper(username, `Your bet has been set to $${newBet}`)
       } else if (newBet < 100) {
@@ -177,9 +181,9 @@ async function profitCommand(bot, command, username) {
   }
 }
 
-function slotsCommand (bot, command, username) {
+async function slotsCommand (bot, command, username) {
   if (command.match(/^\$slot/)) {
-    slots(bot, username)
+    await slots(bot, username)
   }
 }
 
