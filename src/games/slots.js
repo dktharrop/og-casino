@@ -10,12 +10,11 @@ async function waitRatio (x) {
 }
 
 function randomIndex (list, currentSymbol) {
-  // if (currentSymbol === '⭐') {
-  //   return Math.floor(Math.random() * (list.length - 1))
-  // } else {
-  //   return Math.floor(Math.random() * list.length)
-  // }
-  return Math.floor(Math.random() * list.length)
+  if (currentSymbol === '⭐') {
+    return Math.floor(Math.random() * (list.length - 1))
+  } else {
+    return Math.floor(Math.random() * list.length)
+  }
 }
 
 export default async function slots (bot, username) {
@@ -42,12 +41,12 @@ export default async function slots (bot, username) {
           result[2] = symbols[randomIndex(symbols, result[2])]
         }
       } else if (i < rollCount / 2) {
-        result[2] = symbols[randomIndex(symbols, result[2])]
-        result[1] = symbols[randomIndex(symbols, result[1])]
+        result[2] = symbols[randomIndex(symbols, ' ')]
+        result[1] = symbols[randomIndex(symbols, ' ')]
       } else {
-        result[2] = symbols[randomIndex(symbols, result[2])]
-        result[1] = symbols[randomIndex(symbols, result[1])]
-        result[0] = symbols[randomIndex(symbols, result[0])]
+        result[2] = symbols[randomIndex(symbols, ' ')]
+        result[1] = symbols[randomIndex(symbols, ' ')]
+        result[0] = symbols[randomIndex(symbols, ' ')]
       }
 
       bot.whisper(username, `${result.join(' ')}`)
