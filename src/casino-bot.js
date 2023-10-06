@@ -1,4 +1,5 @@
 import mineflayer from 'mineflayer'
+// import readline from 'readline'
 import * as commandHandler from './command-handler.js'
 import * as userManager from './user-manager.js' // only for hotfix, remove later
 
@@ -17,12 +18,17 @@ export default class CasinoBot {
       viewDistance: botArgs.viewDistance,
       hideErrors: botArgs.hideErrors,
     })
-    this.initEvents(this.bot)
+    // const rl = readline.createInterface({
+    //   input: process.stdin,
+    //   output: process.stdout
+    // })
+    this.initEvents(this.bot, rl)
   }
 
-  initEvents (bot) {
-    bot.on('inject_allowed', () => {
-    })
+  initEvents (bot, rl) {
+    // rl.on('line', (input) => {
+    //   bot.chat(input)
+    // })
 
     bot.on('login', () => {
       const botSocket = bot._client.socket

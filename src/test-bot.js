@@ -1,5 +1,4 @@
 import mineflayer from 'mineflayer'
-import tokens from 'prismarine-tokens'
 import readline from 'readline'
 import dotenv from 'dotenv'
 

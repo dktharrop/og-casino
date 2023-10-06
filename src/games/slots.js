@@ -10,11 +10,12 @@ async function waitRatio (x) {
 }
 
 function randomIndex (list, currentSymbol) {
-  if (currentSymbol === '⭐') {
-    return Math.floor(Math.random() * (list.length - 1))
-  } else {
-    return Math.floor(Math.random() * list.length)
-  }
+  // if (currentSymbol === '⭐') {
+  //   return Math.floor(Math.random() * (list.length - 1))
+  // } else {
+  //   return Math.floor(Math.random() * list.length)
+  // }
+  return Math.floor(Math.random() * list.length)
 }
 
 export default async function slots (bot, username) {
