@@ -87,6 +87,6 @@ export default async function slots (bot, username) {
   } else {
     bot.chat(`/msg ${username} You can't afford the bet!`)
     bot.chat(`/msg ${username} Please lower the bet or /pay the bot to add funds`)
-    bot.chat(`/msg ${username} You can check your balance with -bal, and bet with -bet`)
+    bot.chat(`/msg ${username} You can check your balance with $bal, and bet with $bet`)
   }
 }
