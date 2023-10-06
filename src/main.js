@@ -2,7 +2,7 @@ import CasinoBot from './casino-bot.js'
 import dotenv from 'dotenv'
 
 dotenv.config()
-const devMode = (process.env.DEVMODE) ? true : false
+const devMode = (process.env.DEVMODE === 'true') ? true : false
 const accounts = JSON.parse(process.env.ACCOUNTS)
 
 if (devMode) {
