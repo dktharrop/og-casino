@@ -2,6 +2,7 @@ import mineflayer from 'mineflayer'
 // import readline from 'readline'
 import * as commandHandler from './command-handler.js'
 import * as userManager from './user-manager.js' // only for hotfix, remove later
+import * as botManager from './main.js'
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -18,6 +19,7 @@ export default class CasinoBot {
       viewDistance: botArgs.viewDistance,
       hideErrors: botArgs.hideErrors,
     })
+    this.botArgs = botArgs
     this.initEvents(this.bot)
   }
 
@@ -45,7 +47,8 @@ export default class CasinoBot {
       }
 
       // attempt reconnect
-      // setTimeout(() => initBot(), 5000)
+      botManager.stopBot(0)
+      setTimeout(() => botManager.startBot(this.botArgs), 5000)
     })
 
     bot.on('error', (err) => {

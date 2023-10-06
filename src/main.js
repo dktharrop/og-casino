@@ -7,7 +7,7 @@ const accounts = JSON.parse(process.env.ACCOUNTS)
 
 const account = (devMode) ? accounts[0] : accounts[2]
 
-export const bots = []
+const bots = []
 
 startBot({
   username: account.username,
