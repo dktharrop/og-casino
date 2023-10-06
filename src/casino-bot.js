@@ -57,7 +57,7 @@ export default class CasinoBot {
       const rawMsg = jsonMsg.toString()
       const message = this.getMessage(rawMsg) // returns either type whisper or message
       const command = (message) ? commandHandler.parseCommand(message.username, message.content, message.type) : false
-      if (command !== 'invalid' && command !== false) {
+      if (command !== 'invalid' && command !== false && (message.type === 'whisper' || message.type === 'payment')) {
         console.log(command)
         commandHandler.enqueueCommand(bot, command.commandName, command.commandArgs)
 
