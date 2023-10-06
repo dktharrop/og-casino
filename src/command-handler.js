@@ -48,7 +48,7 @@ const commands = [
     devOnly: false,
     execute: async (bot, args, username) => {
       if (args[1]) {
-        const newBet = Number(args[1])
+        const newBet = Math.round(Number(args[1]))
         if (newBet >= 100 && newBet < 1000000) {
           await userManager.editUser(username, 'set', 'bet', newBet)
           bot.whisper(username, `Your bet has been set to $${newBet}`)
