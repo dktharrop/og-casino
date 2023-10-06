@@ -47,6 +47,7 @@ const commands = [
         if (newBet >= 100 && newBet < 1000000) {
           await userManager.editUser(username, 'set', 'bet', newBet)
           bot.whisper(username, `Your bet has been set to $${newBet}`)
+          console.log(`${username} changed their bet to $${newBet}`)
         } else if (newBet < 100) {
           bot.whisper(username, 'The minimum bet is $100!')
         } else {
@@ -89,6 +90,7 @@ const commands = [
     description: 'Usage info',
     devOnly: false,
     execute: (bot, args, username) => {
+      console.log(`${username} used $help`)
       commands.forEach((command) => {
         if (command.devOnly) return
         bot.whisper(username, `$${command.name} | ${command.description}`)
@@ -127,6 +129,7 @@ const commands = [
       if (payment > 0) {
         await userManager.editUser(username, 'add', 'balance', payment)
         bot.whisper(username, `$${payment} has been added to your account`)
+        console.log(`${username} added $${payment} to their account`)
       } else {
         bot.whisper(username, 'Please enter a valid payment!')
       }
@@ -165,15 +168,13 @@ const commands = [
         const withdrawl = args[2]
         const user = await userManager.getUser(player)
   
-        console.log(user.balance)
-        console.log(user)
-  
         if (withdrawl > 0 && withdrawl <= user.balance) {
           await userManager.editUser(player, 'set', 'balance', user.balance - withdrawl)
           bot.whisper(player, `$${withdrawl} withdrawn`)
           bot.whisper(player, `Your new balance is $${user.balance - withdrawl}`)
           bot.whisper('150cc', `Withdrew ${withdrawl} from ${player} ($${user.balance} to $${user.balance - withdrawl})`)
           bot.chat(`/pay ${player} ${withdrawl}`)
+          console.log(`${player} withdrew $${withdrawl} (from $${user.balance} to $${user.balance - withdrawl})`)
         } else {
           bot.whisper(username, 'Please enter a valid withdrawl! Can you afford it?')
         }

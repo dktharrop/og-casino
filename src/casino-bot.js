@@ -57,17 +57,15 @@ export default class CasinoBot {
       const rawMsg = jsonMsg.toString()
       const message = this.getMessage(rawMsg) // returns either type whisper or message
       const command = (message) ? commandHandler.parseCommand(message.username, message.content, message.type) : false
-      if (command !== 'invalid' && command !== false && (message.type === 'whisper' || message.type === 'payment')) {
-        console.log(command)
+      if (command !== 'invalid' && command !== false && (message.type === 'whisper' || message.type === 'payment') && !message.username.match(/^\*/)) {
         commandHandler.enqueueCommand(bot, command.commandName, command.commandArgs)
-
-        // }
-        // DONT UNCOMMENT THIS ITS SO BROKEN (it messages any player who talks in chat)
-        // else if (message.content.match(/^\$/)) {
-        //   bot.whisper(message.username, 'Please /msg the bot! All bot commands are done through private messages to avoid spam. Confused? Use $help for more info.')
-        // }
-      } else if (message.type === 'whisper' && message.content.match(/^\$/)) {
+      } else if (message.type === 'whisper' && message.content.match(/^\$/) && !message.username.match(/^\*/)) {
         bot.whisper(message.username, 'Invalid command! Use $help for a list of commands.')
+      } else if(message !== undefined && message.type === 'whisper' && message.username.match(/^\*/)) {
+        bot.whisper(message.username, 'Sorry! Bedrock players can\'t use the bot right now...')
+        bot.whisper(message.username, 'This is because bedrock playres don\'t have java UUIDs, so I can\'t store their data properly')
+        bot.whisper(message.username, 'Addotonally, bedrock does not properly display the emoji used by the bot')
+        console.log(`${message.username} just learned that bedrockers are second class citizens...`)
       }
     })
   }
@@ -105,7 +103,6 @@ export default class CasinoBot {
         type: 'whisper'
       }
     } else if (payMatch) {
-      console.log(payMatch)
       const payment = payMatch[1]
       return {
         username: payMatch[2],
