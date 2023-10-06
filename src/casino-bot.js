@@ -9,20 +9,25 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 export default class CasinoBot {
   // Constructor
   constructor (botArgs) {
-    this.bot = mineflayer.createBot({
+    const botOptions = {
       username: botArgs.username,
-      password: botArgs.password,
       auth: botArgs.auth,
       host: botArgs.host,
       port: botArgs.port,
       version: botArgs.version,
       viewDistance: botArgs.viewDistance,
       hideErrors: botArgs.hideErrors,
-    })
+    }
+    if (botArgs.password) {
+      botOptions.password = botArgs.password
+    }
+
+    this.bot = mineflayer.createBot(botOptions)
     this.rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout
     })
+
     this.botArgs = botArgs
     this.initEvents(this.bot, this.rl)
   }
@@ -58,6 +63,10 @@ export default class CasinoBot {
     bot.on('error', (err) => {
       if (err.cide === 'ECONNREFUSED') {
         console.log(`[${bot.username}] Failed to connect to ${err.address}:${err.port}`)
+      } else if (err.details.reason === 'UNAUTHORIZED') {
+        this.botArgs.password = undefined
+        botManager.stopBot(0)
+        setTimeout(() => botManager.startBot(this.botArgs), 5000)
       } else {
         console.log(`[${bot.username}] Unhandled error: ${err}`)
       }

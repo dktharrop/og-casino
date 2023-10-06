@@ -2,10 +2,15 @@ import CasinoBot from './casino-bot.js'
 import dotenv from 'dotenv'
 
 dotenv.config()
-const devMode = process.env.DEVMODE
+const devMode = (process.env.DEVMODE) ? true : false
 const accounts = JSON.parse(process.env.ACCOUNTS)
 
-const account = (devMode) ? accounts[0] : accounts[2]
+if (devMode) {
+  console.log('----------------------------------------')
+  console.log('\tDEVELOPMENT MODE ENABLED')
+  console.log('----------------------------------------')
+}
+const account = (devMode) ? accounts[1] : accounts[2]
 
 const bots = []
 

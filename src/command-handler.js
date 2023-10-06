@@ -5,7 +5,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 const devName = process.env.DEV
-const devMode = process.env.DEVMODE
+const devMode = (process.env.DEVMODE === 'true') ? true : false
 const testers = JSON.parse(process.env.TESTERS)
 
 const commands = [
