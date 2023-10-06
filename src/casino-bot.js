@@ -1,5 +1,5 @@
 import mineflayer from 'mineflayer'
-// import readline from 'readline'
+import readline from 'readline'
 import * as commandHandler from './command-handler.js'
 import * as userManager from './user-manager.js' // only for hotfix, remove later
 import * as botManager from './main.js'
@@ -19,14 +19,18 @@ export default class CasinoBot {
       viewDistance: botArgs.viewDistance,
       hideErrors: botArgs.hideErrors,
     })
+    this.rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout
+    })
     this.botArgs = botArgs
-    this.initEvents(this.bot)
+    this.initEvents(this.bot, this.rl)
   }
 
-  initEvents (bot) {
-    // rl.on('line', (input) => {
-    //   bot.chat(input)
-    // })
+  initEvents (bot, rl) {
+    rl.on('line', (input) => {
+      bot.chat(input)
+    })
 
     bot.on('login', () => {
       const botSocket = bot._client.socket
