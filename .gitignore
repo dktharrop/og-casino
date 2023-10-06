@@ -4,3 +4,4 @@ Dockerfile
 fly.toml
 users.json
 node_modules
+backup
