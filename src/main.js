@@ -1,9 +1,15 @@
 import CasinoBot from './casino-bot.js'
+import dotenv from 'dotenv'
+
+dotenv.config()
+
+const account = JSON.parse(process.env.ACCOUNTS)[0]
 
 export const bots = []
 
 startBot({
-  username: 'dharropalt1.7tons@slmail.me',
+  username: account.username,
+  password: account.password,
   auth: 'microsoft',
   host: 'og-network.net',
   port: '25565',

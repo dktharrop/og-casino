@@ -9,12 +9,16 @@ async function waitRatio (x) {
   await sleep(ms)
 }
 
-function randomIndex (list) {
-  return Math.floor(Math.random() * list.length)
+function randomIndex (list, currentSymbol) {
+  if (currentSymbol === '⭐') {
+    return Math.floor(Math.random() * (list.length - 1))
+  } else {
+    return Math.floor(Math.random() * list.length)
+  }
 }
 
 export default async function slots (bot, username) {
-  const symbols = ['🗡', '🏹', '🪓', '🔱', '⭐', '🍖']
+  const symbols = ['🗡', '🏹', '🪓', '🔱', '🍖', '⭐']
   const rollCount = Math.ceil(Math.random() * 16) + 32
   const user = await userManager.getUser(username)
   const result = []
@@ -26,22 +30,23 @@ export default async function slots (bot, username) {
 
     bot.whisper(username, '------')
 
+    let lastStarIndex = -1
     for (let i = rollCount; i > 0; i--) {
       if (i < rollCount / 4) {
-        result[2] = symbols[randomIndex(symbols)]
+        result[2] = symbols[randomIndex(symbols, result[2])]
 
         if (result[0] === result[1]) {
           i = (Math.random() < 0.5) ? i + 1 : i
           while (result[2] === result[1])
-          result[2] = symbols[randomIndex(symbols)]
+          result[2] = symbols[randomIndex(symbols, result[2])]
         }
       } else if (i < rollCount / 2) {
-        result[2] = symbols[randomIndex(symbols)]
-        result[1] = symbols[randomIndex(symbols)]
+        result[2] = symbols[randomIndex(symbols, result[2])]
+        result[1] = symbols[randomIndex(symbols, result[1])]
       } else {
-        result[2] = symbols[randomIndex(symbols)]
-        result[1] = symbols[randomIndex(symbols)]
-        result[0] = symbols[randomIndex(symbols)]
+        result[2] = symbols[randomIndex(symbols, result[2])]
+        result[1] = symbols[randomIndex(symbols, result[1])]
+        result[0] = symbols[randomIndex(symbols, result[0])]
       }
 
       bot.whisper(username, `${result.join(' ')}`)

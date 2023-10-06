@@ -8,6 +8,7 @@ export default class CasinoBot {
   constructor (botArgs) {
     this.bot = mineflayer.createBot({
       username: botArgs.username,
+      password: botArgs.password,
       auth: botArgs.auth,
       host: botArgs.host,
       port: botArgs.port,
@@ -55,18 +56,18 @@ export default class CasinoBot {
     bot.on('message', (jsonMsg) => {
       const rawMsg = jsonMsg.toString()
       const message = this.getMessage(rawMsg) // returns either type whisper or message
-      // console.log(rawMsg)
-      if (message) {
-        const command = commandHandler.parseCommand(message.username, message.content)
-        if (message.type === 'whisper' && command) {
-          const name = command.name
-          const args = command.args
-          commandHandler.enqueueCommand({ bot, name, args })
-        }
+      const command = (message) ? commandHandler.parseCommand(message.username, message.content, message.type) : false
+      if (command !== 'invalid' && command !== false) {
+        console.log(command)
+        commandHandler.enqueueCommand(bot, command.commandName, command.commandArgs)
+
+        // }
         // DONT UNCOMMENT THIS ITS SO BROKEN (it messages any player who talks in chat)
         // else if (message.content.match(/^\$/)) {
         //   bot.whisper(message.username, 'Please /msg the bot! All bot commands are done through private messages to avoid spam. Confused? Use $help for more info.')
         // }
+      } else if (message.type === 'whisper' && message.content.match(/^\$/)) {
+        bot.whisper(message.username, 'Invalid command! Use $help for a list of commands.')
       }
     })
   }
@@ -89,6 +90,7 @@ export default class CasinoBot {
   getMessage(input) {
     const chatMatch = input.match(/^\[[^\]]+\](?:.*?)? ✪?\[[^\]]+\] ([^:]+): (.+)$/)
     const whisperMatch = input.match(/^From ✪?\[[^\]]+\] ([^:]+): (.+)\s*$/)
+    const payMatch = input.match(/\$(\d{1,3}(?:,\d{3})*) has been received from ✪?\[[^\]]+\] (.+)\.$/)
 
     if (chatMatch) {
       return {
@@ -102,32 +104,18 @@ export default class CasinoBot {
         content: whisperMatch[2],
         type: 'whisper'
       }
-    }
-  }
-
-  async getPayment (bot, rawMsg) {
-    const payMatch = rawMsg.match(/\$(\d{1,3}(?:,\d{3})*) has been received from ✪?\[[^\]]+\] (.+)\.$/)
-    if (payMatch) {
-      console.log(rawMsg)
+    } else if (payMatch) {
+      console.log(payMatch)
       const payment = payMatch[1]
-      const paymentInteger = parseInt(payment.replace(/[^0-9]/g, ''))
-      const username = payMatch[2]
-
-      bot.whisper(username, `$${payment} has been added to your account`)
-      await userManager.editUser(username, 'add', 'balance', paymentInteger)
-    } 
+      return {
+        username: payMatch[2],
+        content: parseInt(payment.replace(/[^0-9]/g, '')),
+        type: 'payment'
+      }
+    }
+    return false
   }
 }
-  // export function addQueue(bot, username, command) {
-  //   bot.queue.push({ username, command })
-  // }
-
-  // export function removeQueue(bot, username) {
-  //   let index = bot.queue.findIndex(queueInfo => queueInfo.username === username);
-  //   if (index !== -1) {
-  //     bot.queue.splice(index, 1);
-  //   }
-  // }
 
   // stuff below should be used/fixed/checked/whatever/u know what im talking about
 
