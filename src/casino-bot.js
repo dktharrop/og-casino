@@ -18,11 +18,7 @@ export default class CasinoBot {
       viewDistance: botArgs.viewDistance,
       hideErrors: botArgs.hideErrors,
     })
-    // const rl = readline.createInterface({
-    //   input: process.stdin,
-    //   output: process.stdout
-    // })
-    this.initEvents(this.bot, rl)
+    this.initEvents(this.bot)
   }
 
   initEvents (bot, rl) {
