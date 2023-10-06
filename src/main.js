@@ -2,8 +2,10 @@ import CasinoBot from './casino-bot.js'
 import dotenv from 'dotenv'
 
 dotenv.config()
+const devMode = process.env.DEVMODE
+const accounts = JSON.parse(process.env.ACCOUNTS)
 
-const account = JSON.parse(process.env.ACCOUNTS)[2]
+const account = (devMode) ? accounts[0] : accounts[2]
 
 export const bots = []
 

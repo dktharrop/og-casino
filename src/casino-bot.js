@@ -10,7 +10,7 @@ export default class CasinoBot {
   constructor (botArgs) {
     this.bot = mineflayer.createBot({
       username: botArgs.username,
-      // password: botArgs.password,
+      password: botArgs.password,
       auth: botArgs.auth,
       host: botArgs.host,
       port: botArgs.port,
