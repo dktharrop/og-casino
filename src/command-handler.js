@@ -60,7 +60,6 @@ const commands = [
         }
       } else {
         const user = await userManager.getUser(username)
-        console.log(username, user)
         bot.whisper(username, `Your bet is $${user.bet}`)
         bot.whisper(username, `A win gives you $${user.bet * 10}`)
       }
@@ -193,7 +192,6 @@ const commandQueue = [];
 
 export function parseCommand(username, message, messageType) {
   const commandMatch = (typeof message === 'string') ? message.match(/^\$.+/) : false
-  console.log(username, message, messageType)
   if (commandMatch) {
     const commandName = commandMatch[0].slice(1).split(' ')[0].trim()
     const commandArgs = message.split(' ').filter(arg => arg !== '').filter(arg => !arg.startsWith('$'))
@@ -202,7 +200,6 @@ export function parseCommand(username, message, messageType) {
     if (getCommand(commandName) === undefined) {
       return 'invalid'
     } else {
-      console.log(commandName, commandArgs)
       return { commandName, commandArgs }
     }
   } 
@@ -223,7 +220,6 @@ function getCommand(commandName) {
 }
 
 export async function enqueueCommand(bot, commandName, commandArgs) {
-  console.log(commandName, commandArgs)
   const command = getCommand(commandName)
   if (command.devOnly && commandArgs[0] !== devName) {
     bot.whisper(commandArgs[0], 'This command is for developers only!')
