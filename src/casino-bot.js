@@ -21,7 +21,7 @@ export default class CasinoBot {
     this.initEvents(this.bot)
   }
 
-  initEvents (bot, rl) {
+  initEvents (bot) {
     // rl.on('line', (input) => {
     //   bot.chat(input)
     // })
