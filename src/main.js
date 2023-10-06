@@ -3,7 +3,7 @@ import dotenv from 'dotenv'
 
 dotenv.config()
 
-const account = JSON.parse(process.env.ACCOUNTS)[0]
+const account = JSON.parse(process.env.ACCOUNTS)[2]
 
 export const bots = []
 

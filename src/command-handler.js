@@ -1,5 +1,10 @@
 import * as userManager from './user-manager.js'
 import slots from './games/slots.js'
+import dotenv from 'dotenv'
+
+dotenv.config()
+
+const devName = process.env.DEV
 
 const commands = [
   // general commands
@@ -124,7 +129,6 @@ const commands = [
     description: 'Add funds to a user\'s account',
     devOnly: true,
     execute: async (bot, args, username) => {
-      const users = await userManager.getUsers()
       const payment = Number(args[1])
       if (payment > 0) {
         await userManager.editUser(username, 'add', 'balance', payment)
@@ -153,7 +157,7 @@ const commands = [
         if (balMatch) {
           const gross = parseInt(balMatch[1].replace(/[^0-9]/g, ''))
           const net = gross - debt
-          bot.whisper('150cc', `$${net.toLocaleString("en-US")}`)
+          bot.whisper(devName, `$${net.toLocaleString("en-US")}`)
         }
       })
     }
@@ -163,7 +167,7 @@ const commands = [
     aliases: [ 'w' ],
     description: 'Withdraw your funds',
     execute: async (bot, args, username) => {
-      if (username === '150cc') {
+      if (username === devName) {
         const player = args[1]
         const withdrawl = args[2]
         const user = await userManager.getUser(player)
@@ -172,7 +176,7 @@ const commands = [
           await userManager.editUser(player, 'set', 'balance', user.balance - withdrawl)
           bot.whisper(player, `$${withdrawl} withdrawn`)
           bot.whisper(player, `Your new balance is $${user.balance - withdrawl}`)
-          bot.whisper('150cc', `Withdrew ${withdrawl} from ${player} ($${user.balance} to $${user.balance - withdrawl})`)
+          bot.whisper(devName, `Withdrew ${withdrawl} from ${player} ($${user.balance} to $${user.balance - withdrawl})`)
           bot.chat(`/pay ${player} ${withdrawl}`)
           console.log(`${player} withdrew $${withdrawl} (from $${user.balance} to $${user.balance - withdrawl})`)
         } else {
@@ -189,7 +193,7 @@ const commandQueue = [];
 
 export function parseCommand(username, message, messageType) {
   const commandMatch = (typeof message === 'string') ? message.match(/^\$.+/) : false
-
+  console.log(username, message, messageType)
   if (commandMatch) {
     const commandName = commandMatch[0].slice(1).split(' ')[0].trim()
     const commandArgs = message.split(' ').filter(arg => arg !== '').filter(arg => !arg.startsWith('$'))
@@ -198,14 +202,18 @@ export function parseCommand(username, message, messageType) {
     if (getCommand(commandName) === undefined) {
       return 'invalid'
     } else {
+      console.log(commandName, commandArgs)
       return { commandName, commandArgs }
     }
-  } else if (messageType === 'payment') {
-    return {
-      commandName: 'pay',
-      commandArgs: [ username, message ]
-    }
-  } else {
+  } 
+  // fix this
+  // else if (messageType === 'payment') {
+  //   return {
+  //     commandName: 'pay',
+  //     commandArgs: [ username, message ]
+  //   }
+  // } 
+  else {
     return false
   }
 }
@@ -215,8 +223,9 @@ function getCommand(commandName) {
 }
 
 export async function enqueueCommand(bot, commandName, commandArgs) {
+  console.log(commandName, commandArgs)
   const command = getCommand(commandName)
-  if (command.devOnly && commandArgs[0] !== '150cc') {
+  if (command.devOnly && commandArgs[0] !== devName) {
     bot.whisper(commandArgs[0], 'This command is for developers only!')
     return
   }
