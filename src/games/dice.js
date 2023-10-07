@@ -29,21 +29,20 @@ export default async function dice (bot, username, guessInt) {
 
     bot.whisper(username, `- ${result} -`)
 
-    console.log(result, guess)
     let winnings = 0
     if (result === guess) {
       winnings = user.bet * 4
       bot.whisper(username, '⭐ You win!! 4x multiplier! ⭐')
     } else {
       bot.whisper(username, 'You lost... ☹ Try again?')
-      console.log(`| ${username} lost $${user.bet} | ${result} | ${guess} |`)
+      console.log(`${username} lost $${user.bet} | ${result} | ${guess}`)
     }
     if (winnings > 0) {
       await userManager.editUser(username, 'add', 'balance', winnings)
       await userManager.editUser(username, 'add', 'gains', winnings)
       bot.whisper(username, `$${winnings} has been added to your account`)
-      bot.whisper('150cc', `${username} won $${user.bet} | ${result} | ${guess} |`)
-      console.log(`${username} won $${user.bet} | ${result} | ${guess} |`)
+      bot.whisper('150cc', `${username} won $${winnings} | ${result} | ${guess} |`)
+      console.log(`${username} won $${winnings} | ${result} | ${guess} |`)
     }
   } else {
     bot.chat(`/msg ${username} You can't afford the bet!`)
