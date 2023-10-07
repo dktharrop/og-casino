@@ -77,7 +77,6 @@ export default class CasinoBot {
       const message = this.getMessage(rawMsg) // returns either type whisper or message
       const command = (message) ? commandHandler.parseCommand(message.username, message.content, message.type) : false
       if (command !== 'invalid' && command !== false && message.type === 'whisper'/* || message.type === 'payment'*/ && !message.username.match(/^\*/)) {
-
         commandHandler.enqueueCommand(bot, command.commandName, command.commandArgs)
       } else if (message.type === 'whisper' && message.content.match(/^\$/) && !message.username.match(/^\*/)) {
         bot.whisper(message.username, 'Invalid command! Use $help for a list of commands.')
@@ -86,7 +85,7 @@ export default class CasinoBot {
         bot.whisper(message.username, 'This is because bedrock playres don\'t have java UUIDs, so I can\'t store their data properly')
         bot.whisper(message.username, 'Addotonally, bedrock does not properly display the emoji used by the bot')
         console.log(`${message.username} just learned that bedrockers are second class citizens...`)
-      } else if (message.type === 'payment') { // fix this
+      } else if (message.type === 'payment' && !jsonMsg.json.clickEvent) { // fix this
         this.makePayment(bot, message.username, message.content)
       }
     })
