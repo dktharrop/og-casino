@@ -172,7 +172,7 @@ const commands = [
         const withdrawl = args[2]
         const user = await userManager.getUser(player)
 
-        newBalance = user.balance - withdrawl
+        const newBalance = user.balance - withdrawl
   
         if (withdrawl > 0 && withdrawl <= user.balance) {
           await userManager.editUser(player, 'set', 'balance', newBalance)
