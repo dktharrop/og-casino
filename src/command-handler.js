@@ -1,5 +1,6 @@
 import * as userManager from './user-manager.js'
 import slots from './games/slots.js'
+import dice from './games/dice.js'
 import dotenv from 'dotenv'
 
 dotenv.config()
@@ -51,7 +52,7 @@ const commands = [
     execute: async (bot, args, username) => {
       if (args[1]) {
         const newBet = Math.round(Number(args[1]))
-        if (newBet >= 100 && newBet < 1000000) {
+        if (newBet >= 100 && newBet < 500000) {
           await userManager.editUser(username, 'set', 'bet', newBet)
           bot.whisper(username, `Your bet has been set to $${formatInt(newBet)}`)
           console.log(`${username} changed their bet to $${formatInt(newBet)}`)
@@ -111,6 +112,20 @@ const commands = [
     devOnly: false,
     execute: async (bot, args, username) => {
       bot.whisper(username, 'Coming soon!')
+    }
+  },
+  {
+    name: 'dice',
+    aliases: [ 'd' ],
+    description: 'Dice game',
+    devOnly: false,
+    execute: async (bot, args, username) => {
+      const guess = Math.round(Number(args[1]))
+      if (guess > 6 || guess < 1 || isNaN(guess)) {
+        bot.whisper(username, 'Please enter a valid guess! (any number 1 to 6)')
+        return
+      }
+      await dice(bot, username, args[1])
     }
   },
   {

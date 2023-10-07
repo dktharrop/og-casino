@@ -30,7 +30,6 @@ export default async function slots (bot, username) {
 
     bot.whisper(username, '------')
 
-    let lastStarIndex = -1
     for (let i = rollCount; i > 0; i--) {
       if (i < rollCount / 4) {
         result[2] = symbols[randomIndex(symbols, result[2])]
