@@ -36,11 +36,10 @@ export default async function slots (bot, username) {
 
         if (result[0] === result[1]) {
           i = (Math.random() < 0.5) ? i + 1 : i
-          while (result[2] === result[1])
-          result[2] = symbols[randomIndex(symbols, result[2])]
         }
+
       } else if (i < rollCount / 2) {
-        result[2] = symbols[randomIndex(symbols, ' ')]
+        result[2] = symbols[randomIndex(symbols, result[2])]
         result[1] = symbols[randomIndex(symbols, ' ')]
       } else {
         result[2] = symbols[randomIndex(symbols, ' ')]
