@@ -71,6 +71,23 @@ const commands = [
     }
   },
   {
+    name: 'disclaimer',
+    aliases: [ 'dis' ],
+    description: 'Please read this!',
+    skipQueue: false,
+    devOnly: false,
+    execute: (bot, args, username) => {
+      bot.whisper(username, '------ DISCLAIMER ------')
+      bot.whisper(username, 'This bot is not affiliated with the OG Network in any way')
+      bot.whisper(username, 'This bot was created for fun, and it\'s possible to win a lot of money!')
+      bot.whisper(username, 'Despite this, it\'s also possible to lose money')
+      bot.whisper(username, 'Try not to take things too seriously, OG Network money has no real value')
+      bot.whisper(username, 'No refunds will be given out, the only exception to this is losses caused by a bug')
+      bot.whisper(username, 'Please be responsible!')
+      bot.whisper(username, '------------------------')
+    }
+  },
+  {
     name: 'topgains',
     aliases: [ 'gainstop', 'tg', 'gt', 'topg', 'gtop' ],
     description: 'Show a list of the highest earners',
