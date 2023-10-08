@@ -1,4 +1,4 @@
-import * as userManager from './user-manager.js'
+import * as jsonManager from './json-manager.js'
 import slots from './games/slots.js'
 import dice from './games/dice.js'
 import dotenv from 'dotenv'
@@ -17,7 +17,7 @@ const commands = [
     description: 'Display your balance',
     devOnly: false,
     execute: async (bot, args, username) => {
-      const user = await userManager.getUser(username)
+      const user = await jsonManager.getUser(username)
       bot.whisper(username, `$${formatInt(user.balance)}`)
     }
   },
@@ -29,14 +29,14 @@ const commands = [
     execute: async (bot, args, username) => {
       bot.whisper(username, 'Getting the top 10 balances...')
 
-      const users = await userManager.getUsers()
+      const users = await jsonManager.getUsers()
       users.sort((a, b) => b.balance - a.balance)
   
       // Get the top 10 users
       const top10 = users.slice(0, 10)
   
       // Get usernames for top 10 users
-      const usernamePromises = top10.map(user => userManager.getUsername(user.uuid));
+      const usernamePromises = top10.map(user => jsonManager.getUsername(user.uuid));
       const usernames = await Promise.all(usernamePromises);
   
       for (let i = 0; i < top10.length; i++) {
@@ -52,8 +52,8 @@ const commands = [
     execute: async (bot, args, username) => {
       if (args[1]) {
         const newBet = Math.round(Number(args[1]))
-        if (newBet >= 100 && newBet < 500000) {
-          await userManager.editUser(username, 'set', 'bet', newBet)
+        if (newBet >= 100 && newBet <= 500000) {
+          await jsonManager.editUser(username, 'set', 'bet', newBet)
           bot.whisper(username, `Your bet has been set to $${formatInt(newBet)}`)
           console.log(`${username} changed their bet to $${formatInt(newBet)}`)
         } else if (newBet < 100) {
@@ -62,7 +62,7 @@ const commands = [
           bot.whisper(username, 'Please enter a valid bet!')
         }
       } else {
-        const user = await userManager.getUser(username)
+        const user = await jsonManager.getUser(username)
         bot.whisper(username, `Your bet is $${formatInt(user.bet)}`)
       }
     }
@@ -75,14 +75,14 @@ const commands = [
     execute: async (bot, args, username) => {
       bot.whisper(username, 'Getting the top 10 earnings...')
 
-      const users = await userManager.getUsers()
+      const users = await jsonManager.getUsers()
       users.sort((a, b) => b.gains - a.gains)
   
       // Get the top 10 users
       const top10 = users.slice(0, 10)
   
       // Get usernames for top 10 users
-      const usernamePromises = top10.map(user => userManager.getUsername(user.uuid));
+      const usernamePromises = top10.map(user => jsonManager.getUsername(user.uuid));
       const usernames = await Promise.all(usernamePromises);
   
       for (let i = 0; i < top10.length; i++) {
@@ -139,6 +139,38 @@ const commands = [
   },
   // developer commands
   {
+    name: 'cashout',
+    aliases: [ 'co' ],
+    description: 'Cash out funds',
+    devOnly: true,
+    execute: async (bot, args, username) => {
+      const botBalance = getBalance(bot)
+      const payment = args[1] ? Math.round(Number(args[1])) : botBalance
+
+      if (!devName || isNaN(payment)) {
+        bot.whisper(devName, 'Please enter valid arguments!')
+        return
+      }
+
+      const newBalance = botBalance - payment
+      if (newBalance < 0) {
+        bot.whisper(devName, 'The bot does not have enough funds!')
+        return
+      }
+
+      if (payment > 0 && payment <= botBalance) {
+          jsonManager.editStats('add', 'profit', payment)
+          bot.chat(`/pay ${devName} ${payment}` )
+          bot.whisper(devName, `Cashed out $${formatInt(payment)} (from $${formatInt(botBalance)} to $${formatInt(newBalance)})`)
+
+          console.log(`${username} Cashed out $${formatInt(payment)} (from $${formatInt(botBalance)} to $${formatInt(newBalance)})`)
+
+      } else {
+        bot.whisper(username, 'Please enter a valid cashout! Can you afford it?')
+      }
+    }
+  },
+  {
     name: 'pay',
     aliases: [ 'p' ],
     description: 'Add funds to a user\'s account',
@@ -146,7 +178,7 @@ const commands = [
     execute: async (bot, args, username) => {
       const payment = Number(args[1])
       if (payment > 0) {
-        await userManager.editUser(username, 'add', 'balance', payment)
+        await jsonManager.editUser(username, 'add', 'balance', payment)
         bot.whisper(username, `$${formatInt(payment)} has been added to your account`)
         console.log(`${username} added $${formatInt(payment)} to their account`)
       } else {
@@ -160,9 +192,10 @@ const commands = [
     description: 'Show net profit',
     devOnly: true,
     execute: async (bot, args, username) => {
-      const users = await userManager.getUsers()
+      const users = await jsonManager.getUsers()
+      const profitStat = jsonManager.getStats('profit')
 
-      let debt = 0;
+      let debt = 0
       for (let i = 0; i < users.length; i++) {
         debt += users[i].balance
       }
@@ -170,7 +203,7 @@ const commands = [
       bot.once('messagestr', (message) => {
         const balMatch = message.match(/^Balance: \$(\d{1,3}(?:,\d{3})*)/)
         if (balMatch) {
-          const gross = parseInt(balMatch[1].replace(/[^0-9]/g, '')) // this doesnt work with decimals
+          let gross = parseInt(balMatch[1].replace(/[^0-9]/g, '')) + profitStat // this doesnt work with decimals
           const net = gross - debt
           bot.whisper(devName, `$${formatInt(net)}`)
         }
@@ -182,31 +215,49 @@ const commands = [
     aliases: [ 'w' ],
     description: 'Withdraw your funds',
     execute: async (bot, args, username) => {
-      if (username === devName) {
-        const player = args[1]
-        const withdrawl = args[2]
-        const user = await userManager.getUser(player)
+      const user = await jsonManager.getUser(username)
 
-        const newBalance = user.balance - withdrawl
-  
-        if (withdrawl > 0 && withdrawl <= user.balance) {
-          await userManager.editUser(player, 'set', 'balance', newBalance)
-          bot.whisper(player, `$${formatInt(withdrawl)} withdrawn`)
-          bot.whisper(player, `Your new balance is $${(formatInt(newBalance))}`)
-          bot.whisper(devName, `Withdrew ${formatInt(withdrawl)} from ${player} ($${formatInt(user.balance)} to $${formatInt(newBalance)})`)
-          bot.chat(`/pay ${player} ${withdrawl}`)
-          console.log(`${player} withdrew $${formatInt(withdrawl)} (from $${formatInt(user.balance)} to $${formatInt(newBalance)})`)
-        } else {
-          bot.whisper(username, 'Please enter a valid withdrawl! Can you afford it?')
-        }
+      if (!user) {
+        bot.whisper(username, 'User not found!')
+        return
+      }
+
+      const botBalance = getBalance(bot)
+      console.log(botBalance)
+      const withdrawl = args[1] ? Math.round(Number(args[1])) : user.balance
+
+      if (withdrawl > botBalance) {
+        bot.whisper(username, 'The bot does not have enough funds!')
+        return
+      }
+
+      if (!username || isNaN(withdrawl)) {
+        bot.whisper(username, 'Please enter valid arguments!')
+        return
+      }
+
+      const newBalance = user.balance - withdrawl
+      if (newBalance < 0) {
+        bot.whisper(username, 'You do not have enough funds to withdraw that amount!')
+        return
+      }
+
+      if (withdrawl > 0 && withdrawl <= user.balance) {
+          await jsonManager.editUser(username, 'set', 'balance', newBalance)
+          bot.whisper(username, `Your new balance is $${formatInt(newBalance)}`)
+
+          bot.chat(`/pay ${username} ${withdrawl}` )
+          bot.whisper(devName, `Withdrew ${formatInt(withdrawl)} from ${username} ($${formatInt(user.balance)} to $${formatInt(newBalance)})`)
+          console.log(`${username} withdrew $${formatInt(withdrawl)} (from $${formatInt(user.balance)} to $${formatInt(newBalance)})`)
+
       } else {
-        bot.whisper(username, 'Contact 150cc on discord or ingame to withdraw funds!')
-      }    
+        bot.whisper(username, 'Please enter a valid withdrawal! Can you afford it?')
+      }
     }
   }
 ]
 
-const commandQueue = [];
+const commandQueue = []
 
 export function parseCommand(username, message, messageType) {
   const commandMatch = (typeof message === 'string') ? message.match(/^\$.+/) : false
@@ -233,6 +284,20 @@ export function parseCommand(username, message, messageType) {
   }
 }
 
+//helper functions
+function getBalance(bot) {
+  const scoreboard = bot.scoreboard
+  for (let key in scoreboard['1'].itemsMap) {
+    const input = scoreboard['1'].itemsMap[key].displayName.toString()
+    const balMatch = input.match(/\$(\d{1,3}(?:,\d{3})*)/)
+    if (balMatch) {
+      return Math.floor(parseInt(balMatch[1].replace(/[^0-9]/g, '')))
+    }
+  }
+  return false
+}
+
+// queue system
 function getCommand(commandName) {
   return commands.find(command => command.name === commandName || command.aliases.includes(commandName))
 }
@@ -243,7 +308,8 @@ export async function enqueueCommand(bot, commandName, commandArgs) {
     bot.whisper(commandArgs[0], 'The bot is in dev mode! Commands are disabled for now.')
   }
 
-  if (command.devOnly && commandArgs[0] !== devName) {
+  if (command.devOnly && (commandArgs[0] !== devName)) {
+    console.log(command.devOnly, commandArgs[0], devName)
     bot.whisper(commandArgs[0], 'This command is for developers only!')
     return
   }

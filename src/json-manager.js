@@ -1,6 +1,29 @@
 import fs from 'fs'
 import fetch from 'node-fetch'
 
+export function editStats (editType, property, value) {
+  const statsData = fs.readFileSync('stats.json')
+  const stats = JSON.parse(statsData)
+
+  if (editType === 'set') {
+    stats[property] = value
+  } else if (editType === 'add') {
+    stats[property] += value
+  } else if (editType === 'subtract') {
+    stats[property] -= value
+  }
+
+  const updatedData = JSON.stringify(stats)
+  fs.writeFileSync('stats.json', updatedData)
+}
+
+export function getStats (stat) {
+  const statsData = fs.readFileSync('stats.json')
+  const stats = JSON.parse(statsData)
+
+  return stats[stat]
+}
+
 export async function editUser (username, editType, property, value) {
   const usersData = fs.readFileSync('users.json')
   const users = JSON.parse(usersData)

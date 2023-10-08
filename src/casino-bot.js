@@ -1,7 +1,7 @@
 import mineflayer from 'mineflayer'
 import readline from 'readline'
 import * as commandHandler from './command-handler.js'
-import * as userManager from './user-manager.js' // only for hotfix, remove later
+import * as jsonManager from './json-manager.js' // only for hotfix, remove later
 import * as botManager from './main.js'
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
@@ -44,7 +44,6 @@ export default class CasinoBot {
 
     bot.on('spawn', async () => {
       console.log(`[${bot.username}] Spawned in at ${bot.entity.position.x}, ${bot.entity.position.y}, ${bot.entity.position.z}`)
-
       this.joinSMP(bot)
     })
 
@@ -136,7 +135,7 @@ export default class CasinoBot {
   }
   async makePayment(bot, username, payment) {
     if (payment > 0) {
-      await userManager.editUser(username, 'add', 'balance', payment)
+      await jsonManager.editUser(username, 'add', 'balance', payment)
       bot.whisper(username, `$${payment} has been added to your account`)
       console.log(`${username} added $${payment} to their account`)
     } else {

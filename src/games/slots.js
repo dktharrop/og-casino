@@ -1,4 +1,4 @@
-import * as userManager from '../user-manager.js'
+import * as jsonManager from '../json-manager.js'
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -20,13 +20,13 @@ function randomIndex (list, currentSymbol) {
 export default async function slots (bot, username) {
   const symbols = ['🗡', '🏹', '🪓', '🔱', '🍖', '⭐']
   const rollCount = Math.ceil(Math.random() * 16) + 32
-  const user = await userManager.getUser(username)
+  const user = await jsonManager.getUser(username)
   const result = []
 
   if (user.balance >= user.bet && user.balance > 0) {
     console.log(`${username} rolling slots with a bet of $${user.bet}`)
-    await userManager.editUser(username, 'subtract', 'balance', user.bet)
-    await userManager.editUser(username, 'add', 'loss', user.bet)
+    await jsonManager.editUser(username, 'subtract', 'balance', user.bet)
+    await jsonManager.editUser(username, 'add', 'loss', user.bet)
 
     bot.whisper(username, '------')
 
@@ -77,8 +77,8 @@ export default async function slots (bot, username) {
       console.log(`${username} lost $${user.bet} | ${result.join(' ')}`)
     }
     if (winnings > 0) {
-      await userManager.editUser(username, 'add', 'balance', winnings)
-      await userManager.editUser(username, 'add', 'gains', winnings)
+      await jsonManager.editUser(username, 'add', 'balance', winnings)
+      await jsonManager.editUser(username, 'add', 'gains', winnings)
       bot.whisper(username, `$${winnings} has been added to your account`)
       bot.whisper('150cc', `${username} won $${winnings} | ${result.join(' ')}`)
       console.log(`${username} won $${winnings} (net of ${winnings - user.bet}) | ${result.join(' ')}`)

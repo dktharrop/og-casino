@@ -3,5 +3,6 @@
 Dockerfile
 fly.toml
 users.json
+stats.json
 node_modules
 backup

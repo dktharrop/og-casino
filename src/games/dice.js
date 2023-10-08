@@ -1,4 +1,4 @@
-import * as userManager from '../user-manager.js'
+import * as jsonManager from '../json-manager.js'
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -10,16 +10,15 @@ async function waitRatio (x) {
 }
 
 export default async function dice (bot, username, guessInt) {
-  console.log(`${username} guessed ${guessInt}`)
   const symbols = [ '⚀','⚁','⚂','⚃','⚄','⚅' ]
   const guess = symbols[guessInt - 1]
   const rollCount = Math.ceil(Math.random() * 5) + 1
-  const user = await userManager.getUser(username)
+  const user = await jsonManager.getUser(username)
 
   if (user.balance >= user.bet && user.balance > 0) {
     console.log(`${username} rolling dice with a bet of $${user.bet}`)
-    await userManager.editUser(username, 'subtract', 'balance', user.bet)
-    await userManager.editUser(username, 'add', 'loss', user.bet)
+    await jsonManager.editUser(username, 'subtract', 'balance', user.bet)
+    await jsonManager.editUser(username, 'add', 'loss', user.bet)
 
     for (let i = rollCount; i > 0; i--) {
       bot.whisper(username, '|  ?  |')
@@ -38,8 +37,8 @@ export default async function dice (bot, username, guessInt) {
       console.log(`${username} lost $${user.bet} | ${result} | ${guess}`)
     }
     if (winnings > 0) {
-      await userManager.editUser(username, 'add', 'balance', winnings)
-      await userManager.editUser(username, 'add', 'gains', winnings)
+      await jsonManager.editUser(username, 'add', 'balance', winnings)
+      await jsonManager.editUser(username, 'add', 'gains', winnings)
       bot.whisper(username, `$${winnings} has been added to your account`)
       bot.whisper('150cc', `${username} won $${winnings} | ${result} | ${guess} |`)
       console.log(`${username} won $${winnings} | ${result} | ${guess} |`)
