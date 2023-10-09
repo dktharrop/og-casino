@@ -71,6 +71,33 @@ const commands = [
     }
   },
   {
+    name: 'daily',
+    aliases: [ 'd' ],
+    description: 'Claim your daily reward',
+    skipQueue: true,
+    devOnly: false,
+    execute: async (bot, args, username) => {
+      const user = await jsonManager.getUser(username)
+
+      const now = Math.floor(Date.now() / 1000)
+      if (now - user.lastDaily >= 86400) {
+        const newBalance = user.balance + 1000
+        await jsonManager.editUser(username, 'set', 'balance', newBalance)
+        await jsonManager.editUser(username, 'set', 'lastDaily', now)
+        bot.whisper(username, 'You have claimed your daily reward of $500!')
+        console.log(`${username} claimed their daily reward of $500!`)
+      }
+      // show formatted time until next daily depending on how much time is left
+      else {
+        const timeLeft = 86400 - (now - user.lastDaily)
+        const hours = Math.floor(timeLeft / 3600)
+        const minutes = Math.floor((timeLeft - (hours * 3600)) / 60)
+        const seconds = timeLeft - (hours * 3600) - (minutes * 60)
+        bot.whisper(username, `You can claim your daily reward in${(hours > 0) ? ` ${hours} hours,` : ''}${(minutes > 0) ? ` ${minutes} minutes,` : ''}${(seconds > 0) ? ` ${seconds} seconds` : ''}`)
+      }
+    }
+  },
+  {
     name: 'disclaimer',
     aliases: [ 'dis' ],
     description: 'Please read this!',
@@ -119,10 +146,12 @@ const commands = [
     devOnly: false,
     execute: (bot, args, username) => {
       console.log(`${username} used $help`)
+      bot.whisper(username, '--------- HELP ---------')
       commands.forEach((command) => {
         if (command.devOnly) return
         bot.whisper(username, `$${command.name} | ${command.description}`)
       })
+      bot.whisper(username, '------------------------')
       bot.whisper(username, 'Pay the bot to add funds to your account and get started!')
     }
   },
@@ -174,16 +203,35 @@ const commands = [
     }
   },
   // games
-  {
-    name: 'coinflip',
-    aliases: [ 'cf' ],
-    description: 'Coinflip game',
-    skipQueue: false,
-    devOnly: false,
-    execute: async (bot, args, username) => {
-      bot.whisper(username, 'Coming soon!')
-    }
-  },
+  // {
+  //   name: 'coinflip',
+  //   aliases: [ 'cf' ],
+  //   description: 'Coinflip game',
+  //   skipQueue: false,
+  //   devOnly: false,
+  //   execute: async (bot, args, username) => {
+  //     const player = args[1] ? args[1] : false
+  //     if (args[2] === 'challenge') {
+  //       if (!player || !bot.players[player]) {
+  //         bot.whisper(username, 'Please enter a valid player!')
+  //         return
+  //       }
+  //       bot.whisper(username, `Request sent to ${player}! They have 30 seconds to accept.`)
+  //       bot.whisper(player, `${username} has challenged you to a coinflip! You $coinflip accept to accept. The request will expire in 30 seconds.`)
+
+  //       setTimeout(() => {
+  //         if (bot.players[player]) {
+  //           bot.whisper(player, 'The request has expired.')
+  //           return
+  //         }
+  //       }, 30000)
+  //       return
+  //     }
+  //     if (args[2] === 'accept') {
+
+  //     }
+  //   }
+  // },
   {
     name: 'dice',
     aliases: [ 'd' ],
