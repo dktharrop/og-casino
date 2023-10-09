@@ -71,14 +71,17 @@ export default class CasinoBot {
       }
     })
 
-    bot.on('message', (jsonMsg) => {
+    bot.on('message', (jsonMsg) => { // this is so bad fix this
       const rawMsg = jsonMsg.toString()
       const message = this.getMessage(rawMsg) // returns either type whisper or message
       const command = (message) ? commandHandler.parseCommand(message.username, message.content, message.type) : false
-      if (command !== 'invalid' && command !== false && message.type === 'whisper'/* || message.type === 'payment'*/ && !message.username.match(/^\*/)) {
+      if (command !== 'invalidPrefix' && command !== 'invalid' && command !== false && message.type === 'whisper'/* || message.type === 'payment'*/ && !message.username.match(/^\*/)) {
         commandHandler.enqueueCommand(bot, command.commandName, command.commandArgs)
-      } else if (message.type === 'whisper' && message.content.match(/^\$/) && !message.username.match(/^\*/)) {
+      } else if (command === 'invalid' && message.type === 'whisper' && message.content.match(/^\$/) && !message.username.match(/^\*/)) {
         bot.whisper(message.username, 'Invalid command! Use $help for a list of commands.')
+      } else if (command === 'invalidPrefix' && message.type === 'whisper' && !message.username.match(/^\*/)) {
+        bot.whisper(message.username, 'Invalid prefix! Use \'$\' to run commands. For example:')
+        bot.whisper(message.username, '/msg VegasCasino1 $help')
       } else if (message !== undefined && message.type === 'whisper' && message.username.match(/^\*/)) {
         bot.whisper(message.username, 'Sorry! Bedrock players can\'t use the bot right now...')
         bot.whisper(message.username, 'This is because bedrock playres don\'t have java UUIDs, so I can\'t store their data properly')
