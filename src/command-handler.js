@@ -389,7 +389,7 @@ export function parseCommand(username, message, messageType) {
     } else {
       return { commandName, commandArgs }
     }
-  } else if (message.match(/^-|^\/|^!|^&|^#/)) {
+  } else if (messageType === 'whisper' && message.match(/^-|^\/|^!|^&|^#/)) {
     console.log(message)
     return 'invalidPrefix'
   }
