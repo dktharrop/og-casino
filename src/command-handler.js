@@ -284,7 +284,7 @@ const commands = [
         bot.whisper(username, 'Please enter a valid guess! (any number 1 to 6)')
         return
       }
-      await dice(bot, username, args[1])
+      await dice(bot, username, guess, devName)
     }
   },
   {
@@ -294,7 +294,7 @@ const commands = [
     skipQueue: false,
     devOnly: false,
     execute: async (bot, args, username) => {
-      await slots(bot, username)
+      await slots(bot, username, devName)
     }
   },
   // developer commands

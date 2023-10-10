@@ -9,7 +9,7 @@ async function waitRatio (x) {
   await sleep(ms)
 }
 
-export default async function dice (bot, username, guessInt) {
+export default async function dice (bot, username, guessInt, devName) {
   const symbols = [ '⚀','⚁','⚂','⚃','⚄','⚅' ]
   const guess = symbols[guessInt - 1]
   const rollCount = Math.ceil(Math.random() * 5) + 1
@@ -40,7 +40,7 @@ export default async function dice (bot, username, guessInt) {
       await jsonManager.editUser(username, 'add', 'balance', winnings)
       await jsonManager.editUser(username, 'add', 'gains', winnings)
       bot.whisper(username, `$${winnings} has been added to your account`)
-      bot.whisper('150cc', `${username} won $${winnings} | ${result} | ${guess} |`)
+      bot.whisper(devName, `${username} won $${winnings} | ${result} | ${guess} |`)
       console.log(`${username} won $${winnings} | ${result} | ${guess} |`)
     }
   } else {

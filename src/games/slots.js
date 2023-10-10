@@ -17,7 +17,7 @@ function randomIndex (list, currentSymbol) {
   }
 }
 
-export default async function slots (bot, username) {
+export default async function slots (bot, username, devName) {
   const symbols = ['🗡', '🏹', '🪓', '🔱', '🍖', '⭐']
   const rollCount = Math.ceil(Math.random() * 16) + 32
   const user = await jsonManager.getUser(username)
@@ -79,7 +79,7 @@ export default async function slots (bot, username) {
       await jsonManager.editUser(username, 'add', 'balance', winnings)
       await jsonManager.editUser(username, 'add', 'gains', winnings)
       bot.whisper(username, `$${winnings} has been added to your account`)
-      bot.whisper('150cc', `${username} won $${winnings} | ${result.join(' ')}`)
+      bot.whisper(devName, `${username} won $${winnings} | ${result.join(' ')}`)
       console.log(`${username} won $${winnings} (net of ${winnings - user.bet}) | ${result.join(' ')}`)
     }
   } else {
