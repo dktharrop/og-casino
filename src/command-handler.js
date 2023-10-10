@@ -71,21 +71,44 @@ const commands = [
     }
   },
   {
+    name: 'bonus',
+    aliases: ['bon', 'bo'],
+    description: 'Claim your welcome bonus',
+    skipQueue: true,
+    devOnly: false,
+    execute: async (bot, args, username) => {
+      const bonus = 5000
+      const user = await jsonManager.getUser(username)
+
+      if (user.bonus) {
+        bot.whisper(username, 'You have already claimed the welcome bonus!')
+        return
+      }
+
+      await jsonManager.editUser(username, 'add', 'balance', bonus)
+      await jsonManager.editUser(username, 'add', 'gains', bonus)
+      await jsonManager.editUser(username, 'set', 'bonus', true)
+      bot.whisper(username, `$${bonus} has been added to your account!`)
+      console.log(`${username} claimed their welcome bonus of $${bonus}!`)
+    }
+  },
+  {
     name: 'daily',
     aliases: ['d'],
     description: 'Claim your daily reward',
     skipQueue: true,
     devOnly: false,
     execute: async (bot, args, username) => {
+      const daily = 1000
       const user = await jsonManager.getUser(username)
 
       const now = Math.floor(Date.now() / 1000)
       if (now - user.lastDaily >= 86400) {
-        const newBalance = user.balance + 1000
-        await jsonManager.editUser(username, 'set', 'balance', newBalance)
+        await jsonManager.editUser(username, 'add', 'balance', daily)
+        await jsonManager.editUser(username, 'add', 'gains', daily)
         await jsonManager.editUser(username, 'set', 'lastDaily', now)
-        bot.whisper(username, 'You have claimed your daily reward of $500!')
-        console.log(`${username} claimed their daily reward of $500!`)
+        bot.whisper(username, `You have claimed your daily reward of $${daily}!`)
+        console.log(`${username} claimed their daily reward of $${daily}!`)
       } else {
         const timeLeft = 86400 - (now - user.lastDaily)
         const hours = Math.floor(timeLeft / 3600)
