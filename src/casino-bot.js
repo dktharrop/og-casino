@@ -60,15 +60,15 @@ export default class CasinoBot {
     })
 
     bot.on('error', (err) => {
-      if (err.cide === 'ECONNREFUSED') {
+      if (err.code === 'ECONNREFUSED') {
         console.log(`[${bot.username}] Failed to connect to ${err.address}:${err.port}`)
-      } else if (err.details.reason === 'UNAUTHORIZED') {
+      } else if (err.details?.reason === 'UNAUTHORIZED') {
         this.botArgs.password = undefined
-        botManager.stopBot(0)
-        setTimeout(() => botManager.startBot(this.botArgs), 5000)
       } else {
         console.log(`[${bot.username}] Unhandled error: ${err}`)
       }
+      botManager.stopBot(0)
+      setTimeout(() => botManager.startBot(this.botArgs), 5000)
     })
 
     bot.on('message', (jsonMsg) => { // this is so bad fix this
