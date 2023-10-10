@@ -284,7 +284,35 @@ const commands = [
         bot.whisper(username, 'Please enter a valid guess! (any number 1 to 6)')
         return
       }
-      await dice(bot, username, guess, devName)
+      const user = await jsonManager.getUser(username)
+
+      if (user.balance < user.bet || user.balance <= 0) {
+        bot.chat(`/msg ${username} You can't afford the bet!`)
+        bot.chat(`/msg ${username} Please lower the bet or /pay the bot to add funds`)
+        bot.chat(`/msg ${username} You can check your balance with $bal, and bet with $bet`)
+        return
+      }
+      console.log(`${username} rolling dice with a bet of $${user.bet}`)
+      await jsonManager.editUser(username, 'subtract', 'balance', user.bet)
+      await jsonManager.editUser(username, 'add', 'loss', user.bet)
+      await jsonManager.editUser(username, 'add', 'diceRolls', 1)
+
+      const result = await dice(bot, username, guess, devName)
+
+      if (result.guess === result.roll) {
+        const winnings = user.bet * 4
+        await jsonManager.editUser(username, 'add', 'balance', winnings)
+        await jsonManager.editUser(username, 'add', 'gains', winnings)
+        await jsonManager.editUser(username, 'add', 'diceWins', 1)
+
+        bot.whisper(username, '⭐ You win!! 4x multiplier! ⭐')
+        bot.whisper(username, `$${winnings} has been added to your account`)
+        bot.whisper(devName, `${username} won $${winnings} | ${result.roll} | ${result.guess} |`)
+        console.log(`${username} won $${winnings} | ${result.roll} | ${result.guess} |`)
+      } else {
+        bot.whisper(username, 'You lost... ☹ Try again?')
+        console.log(`${username} lost $${user.bet} | ${result.roll} | ${result.guess}`)
+      }
     }
   },
   {
@@ -294,7 +322,56 @@ const commands = [
     skipQueue: false,
     devOnly: false,
     execute: async (bot, args, username) => {
-      await slots(bot, username, devName)
+      const user = await jsonManager.getUser(username)
+
+      if (user.balance < user.bet  || user.balance <= 0) {
+        bot.chat(`/msg ${username} You can't afford the bet!`)
+        bot.chat(`/msg ${username} Please lower the bet or /pay the bot to add funds`)
+        bot.chat(`/msg ${username} You can check your balance with $bal, and bet with $bet`)
+        return
+      }
+      console.log(`${username} rolling slots with a bet of $${user.bet}`)
+      await jsonManager.editUser(username, 'subtract', 'balance', user.bet)
+      await jsonManager.editUser(username, 'add', 'loss', user.bet)
+      await jsonManager.editUser(username, 'add', 'slotSpins', 1)
+
+      let winnings = 0
+      const result = await slots(bot, username, devName)
+
+      switch (result.code) {
+        case 'slot3Star':
+          winnings = user.bet * 20
+          bot.whisper(username, '⭐ JACKPOT!! 20x winnings! ⭐')
+          break
+        case 'slot3Any':
+          winnings = user.bet * 10
+          bot.whisper(username, `3 in a row! 10x multiplier!`)
+          break
+        case 'slot2Star':
+          winnings = user.bet * 5
+          bot.whisper(username, 'Semi-jackpot! 5x bonus!')
+          break
+        case 'slot2Any':
+          winnings = user.bet
+          bot.whisper(username, '2 in a row!')
+          break
+        case 'slot1Star':
+          winnings = Math.floor(user.bet / 2)
+          bot.whisper(username, '1 star. (not in a row) Try again?')
+          break
+        default:
+          bot.whisper(username, 'You lost... ☹ Try again?')
+          console.log(`${username} lost $${user.bet} | ${result.symbols.join(' ')}`)
+          break
+      }
+      if (winnings > 0) {
+        await jsonManager.editUser(username, 'add', 'balance', winnings)
+        await jsonManager.editUser(username, 'add', 'gains', winnings)
+        await jsonManager.editUser(username, 'add', result.code, 1)
+        bot.whisper(username, `$${winnings} has been added to your account`)
+        bot.whisper(devName, `${username} won $${winnings} | ${result.symbols.join(' ')}`)
+        console.log(`${username} won $${winnings} (net of ${winnings - user.bet}) | ${result.symbols.join(' ')}`)
+      }
     }
   },
   // developer commands
