@@ -13,7 +13,7 @@ export function editStats (editType, property, value) {
     stats[property] -= value
   }
 
-  const updatedData = JSON.stringify(stats)
+  const updatedData = JSON.stringify(stats, null, 2)
   fs.writeFileSync('stats.json', updatedData)
 }
 
@@ -50,7 +50,7 @@ export async function editUser (username, editType, property, value) {
 
   users[userIndex] = user
 
-  const updatedData = JSON.stringify(users)
+  const updatedData = JSON.stringify(users, null, 2)
   fs.writeFileSync('users.json', updatedData)
 }
 
@@ -110,7 +110,7 @@ export async function createUser (uuid) {
 
   users.push(newUser)
 
-  const updatedData = JSON.stringify(users)
+  const updatedData = JSON.stringify(users, null, 2)
   fs.writeFileSync('users.json', updatedData)
 
   return newUser
