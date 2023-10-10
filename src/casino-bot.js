@@ -16,7 +16,7 @@ export default class CasinoBot {
       port: botArgs.port,
       version: botArgs.version,
       viewDistance: botArgs.viewDistance,
-      hideErrors: botArgs.hideErrors,
+      hideErrors: botArgs.hideErrors
     }
     if (botArgs.password) {
       botOptions.password = botArgs.password
@@ -75,7 +75,7 @@ export default class CasinoBot {
       const rawMsg = jsonMsg.toString()
       const message = this.getMessage(rawMsg) // returns either type whisper or message
       const command = (message) ? commandHandler.parseCommand(message.username, message.content, message.type) : false
-      if (command !== 'invalidPrefix' && command !== 'invalid' && command !== false && message.type === 'whisper'/* || message.type === 'payment'*/ && !message.username.match(/^\*/)) {
+      if (command !== 'invalidPrefix' && command !== 'invalid' && command !== false && message.type === 'whisper'/* || message.type === 'payment' */ && !message.username.match(/^\*/)) {
         commandHandler.enqueueCommand(bot, command.commandName, command.commandArgs)
       } else if (command === 'invalid' && message.type === 'whisper' && message.content.match(/^\$/) && !message.username.match(/^\*/)) {
         bot.whisper(message.username, 'Invalid command! Use $help for a list of commands.')
@@ -108,21 +108,21 @@ export default class CasinoBot {
     })
   }
 
-  getMessage(input) { // fix this
+  getMessage (input) { // fix this
     const chatMatch = input.match(/^\[[^\]]+\](?:.*?)? ✪?\[[^\]]+\] ([^:]+): (.+)$/)
     const whisperMatch = input.match(/^From ✪?\[[^\]]+\] ([^:]+): (.+)\s*$/)
     const payMatch = input.match(/\$(\d{1,3}(?:,\d{3})*) has been received from ✪?\[[^\]]+\] (.+)\.$/)
 
     if (chatMatch) {
       return {
-        username: chatMatch[1], 
+        username: chatMatch[1],
         content: chatMatch[2],
         type: 'chat'
       }
     } else if (whisperMatch) {
       console.log(input)
       return {
-        username: whisperMatch[1], 
+        username: whisperMatch[1],
         content: whisperMatch[2],
         type: 'whisper'
       }
@@ -136,7 +136,8 @@ export default class CasinoBot {
     }
     return false
   }
-  async makePayment(bot, username, payment) {
+
+  async makePayment (bot, username, payment) {
     if (payment > 0) {
       await jsonManager.editUser(username, 'add', 'balance', payment)
       bot.whisper(username, `$${payment} has been added to your account`)

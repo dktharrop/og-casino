@@ -6,7 +6,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 const devName = process.env.DEV
-const devMode = (process.env.DEVMODE === 'true') ? true : false
+const devMode = (process.env.DEVMODE === 'true')
 const testers = JSON.parse(process.env.TESTERS)
 
 const commands = [
@@ -24,7 +24,7 @@ const commands = [
   },
   {
     name: 'baltop',
-    aliases: [ 'bt' ],
+    aliases: ['bt'],
     description: 'Show a list of top balances',
     skipQueue: false,
     devOnly: true,
@@ -33,14 +33,14 @@ const commands = [
 
       const users = await jsonManager.getUsers()
       users.sort((a, b) => b.balance - a.balance)
-  
+
       // Get the top 10 users
       const top10 = users.slice(0, 10)
-  
+
       // Get usernames for top 10 users
-      const usernamePromises = top10.map(user => jsonManager.getUsername(user.uuid));
-      const usernames = await Promise.all(usernamePromises);
-  
+      const usernamePromises = top10.map(user => jsonManager.getUsername(user.uuid))
+      const usernames = await Promise.all(usernamePromises)
+
       for (let i = 0; i < top10.length; i++) {
         bot.whisper(username, `${usernames[i]}: $${formatInt(top10[i].balance)}`)
       }
@@ -48,7 +48,7 @@ const commands = [
   },
   {
     name: 'bet',
-    aliases: [ 'b' ],
+    aliases: ['b'],
     description: 'View or change your bet',
     skipQueue: true,
     devOnly: false,
@@ -72,7 +72,7 @@ const commands = [
   },
   {
     name: 'daily',
-    aliases: [ 'd' ],
+    aliases: ['d'],
     description: 'Claim your daily reward',
     skipQueue: true,
     devOnly: false,
@@ -86,9 +86,7 @@ const commands = [
         await jsonManager.editUser(username, 'set', 'lastDaily', now)
         bot.whisper(username, 'You have claimed your daily reward of $500!')
         console.log(`${username} claimed their daily reward of $500!`)
-      }
-      // show formatted time until next daily depending on how much time is left
-      else {
+      } else {
         const timeLeft = 86400 - (now - user.lastDaily)
         const hours = Math.floor(timeLeft / 3600)
         const minutes = Math.floor((timeLeft - (hours * 3600)) / 60)
@@ -99,7 +97,7 @@ const commands = [
   },
   {
     name: 'disclaimer',
-    aliases: [ 'dis' ],
+    aliases: ['dis'],
     description: 'Please read this!',
     skipQueue: false,
     devOnly: false,
@@ -116,7 +114,7 @@ const commands = [
   },
   {
     name: 'topgains',
-    aliases: [ 'gainstop', 'tg', 'gt', 'topg', 'gtop' ],
+    aliases: ['gainstop', 'tg', 'gt', 'topg', 'gtop'],
     description: 'Show a list of the highest earners',
     skipQueue: false,
     devOnly: false,
@@ -125,14 +123,14 @@ const commands = [
 
       const users = await jsonManager.getUsers()
       users.sort((a, b) => b.gains - a.gains)
-  
+
       // Get the top 10 users
       const top10 = users.slice(0, 10)
-  
+
       // Get usernames for top 10 users
-      const usernamePromises = top10.map(user => jsonManager.getUsername(user.uuid));
-      const usernames = await Promise.all(usernamePromises);
-  
+      const usernamePromises = top10.map(user => jsonManager.getUsername(user.uuid))
+      const usernames = await Promise.all(usernamePromises)
+
       for (let i = 0; i < top10.length; i++) {
         bot.whisper(username, `${usernames[i]}: $${formatInt(top10[i].gains)}`)
       }
@@ -140,7 +138,7 @@ const commands = [
   },
   {
     name: 'help',
-    aliases: [ 'h' ],
+    aliases: ['h'],
     description: 'Usage info',
     skipQueue: false,
     devOnly: false,
@@ -163,7 +161,7 @@ const commands = [
   //   devOnly: false,
   //   execute: async (bot, args, username) => {
   //     // switch (args[1]) {
-        
+
   //     // const ticketCost = 1000
   //     // const user = await jsonManager.getUser(username)
   //     // const purchase = args[1] ? Math.round(Number(args[1])) : false
@@ -197,7 +195,7 @@ const commands = [
   // },
   {
     name: 'withdraw',
-    aliases: [ 'w' ],
+    aliases: ['w'],
     description: 'Withdraw your funds',
     skipQueue: true,
     devOnly: false,
@@ -230,13 +228,12 @@ const commands = [
       }
 
       if (withdrawl > 0 && withdrawl <= user.balance) {
-          await jsonManager.editUser(username, 'set', 'balance', newBalance)
-          bot.whisper(username, `Your new balance is $${formatInt(newBalance)}`)
+        await jsonManager.editUser(username, 'set', 'balance', newBalance)
+        bot.whisper(username, `Your new balance is $${formatInt(newBalance)}`)
 
-          bot.chat(`/pay ${username} ${withdrawl}` )
-          bot.whisper(devName, `Withdrew ${formatInt(withdrawl)} from ${username} ($${formatInt(user.balance)} to $${formatInt(newBalance)})`)
-          console.log(`${username} withdrew $${formatInt(withdrawl)} (from $${formatInt(user.balance)} to $${formatInt(newBalance)})`)
-
+        bot.chat(`/pay ${username} ${withdrawl}`)
+        bot.whisper(devName, `Withdrew ${formatInt(withdrawl)} from ${username} ($${formatInt(user.balance)} to $${formatInt(newBalance)})`)
+        console.log(`${username} withdrew $${formatInt(withdrawl)} (from $${formatInt(user.balance)} to $${formatInt(newBalance)})`)
       } else {
         bot.whisper(username, 'Please enter a valid withdrawal! Can you afford it?')
       }
@@ -274,7 +271,7 @@ const commands = [
   // },
   {
     name: 'dice',
-    aliases: [ 'd' ],
+    aliases: ['d'],
     description: 'Dice game',
     skipQueue: false,
     devOnly: false,
@@ -317,14 +314,14 @@ const commands = [
   },
   {
     name: 'slots',
-    aliases: [ 's' ],
+    aliases: ['s'],
     description: 'Slots game',
     skipQueue: false,
     devOnly: false,
     execute: async (bot, args, username) => {
       const user = await jsonManager.getUser(username)
 
-      if (user.balance < user.bet  || user.balance <= 0) {
+      if (user.balance < user.bet || user.balance <= 0) {
         bot.chat(`/msg ${username} You can't afford the bet!`)
         bot.chat(`/msg ${username} Please lower the bet or /pay the bot to add funds`)
         bot.chat(`/msg ${username} You can check your balance with $bal, and bet with $bet`)
@@ -345,7 +342,7 @@ const commands = [
           break
         case 'slot3Any':
           winnings = user.bet * 10
-          bot.whisper(username, `3 in a row! 10x multiplier!`)
+          bot.whisper(username, '3 in a row! 10x multiplier!')
           break
         case 'slot2Star':
           winnings = user.bet * 5
@@ -377,7 +374,7 @@ const commands = [
   // developer commands
   {
     name: 'cashout',
-    aliases: [ 'co' ],
+    aliases: ['co'],
     description: 'Cash out funds',
     skipQueue: true,
     devOnly: true,
@@ -397,12 +394,11 @@ const commands = [
       }
 
       if (payment > 0 && payment <= botBalance) {
-          jsonManager.editStats('add', 'profit', payment)
-          bot.chat(`/pay ${devName} ${payment}` )
-          bot.whisper(devName, `Cashed out $${formatInt(payment)} (from $${formatInt(botBalance)} to $${formatInt(newBalance)})`)
+        jsonManager.editStats('add', 'profit', payment)
+        bot.chat(`/pay ${devName} ${payment}`)
+        bot.whisper(devName, `Cashed out $${formatInt(payment)} (from $${formatInt(botBalance)} to $${formatInt(newBalance)})`)
 
-          console.log(`${username} Cashed out $${formatInt(payment)} (from $${formatInt(botBalance)} to $${formatInt(newBalance)})`)
-
+        console.log(`${username} Cashed out $${formatInt(payment)} (from $${formatInt(botBalance)} to $${formatInt(newBalance)})`)
       } else {
         bot.whisper(username, 'Please enter a valid cashout! Can you afford it?')
       }
@@ -410,7 +406,7 @@ const commands = [
   },
   {
     name: 'pay',
-    aliases: [ 'p' ],
+    aliases: ['p'],
     description: 'Add funds to a user\'s account',
     skipQueue: true,
     devOnly: true,
@@ -427,7 +423,7 @@ const commands = [
   },
   {
     name: 'profit',
-    aliases: [ 'pf, pr, pt, pft' ],
+    aliases: ['pf, pr, pt, pft'],
     description: 'Show net profit',
     skipQueue: true,
     devOnly: true,
@@ -443,7 +439,7 @@ const commands = [
       bot.once('messagestr', (message) => {
         const balMatch = message.match(/^Balance: \$(\d{1,3}(?:,\d{3})*)/)
         if (balMatch) {
-          let gross = parseInt(balMatch[1].replace(/[^0-9]/g, '')) + profitStat // this doesnt work with decimals
+          const gross = parseInt(balMatch[1].replace(/[^0-9]/g, '')) + profitStat // this doesnt work with decimals
           const net = gross - debt
           bot.whisper(devName, `$${formatInt(net)}`)
         }
@@ -454,13 +450,13 @@ const commands = [
 
 const commandQueue = []
 
-export function parseCommand(username, message, messageType) {
+export function parseCommand (username, message, messageType) {
   const commandMatch = (typeof message === 'string') ? message.match(/^\$.+/) : false
   if (commandMatch) {
     const commandName = commandMatch[0].slice(1).split(' ')[0].trim()
     const commandArgs = message.split(' ').filter(arg => arg !== '').filter(arg => !arg.startsWith('$'))
     commandArgs.unshift(username)
-    
+
     if (getCommand(commandName) === undefined) {
       return 'invalid'
     } else {
@@ -469,6 +465,7 @@ export function parseCommand(username, message, messageType) {
   } else if (messageType === 'whisper' && message.match(/^-|^\/|^!|^&|^#/)) {
     console.log(message)
     return 'invalidPrefix'
+  // eslint-disable-next-line brace-style
   }
   // fix this
   // else if (messageType === 'payment') {
@@ -476,16 +473,16 @@ export function parseCommand(username, message, messageType) {
   //     commandName: 'pay',
   //     commandArgs: [ username, message ]
   //   }
-  // } 
+  // }
   else {
     return false
   }
 }
 
-//helper functions
-function getBalance(bot) {
+// helper functions
+function getBalance (bot) {
   const scoreboard = bot.scoreboard
-  for (let key in scoreboard['1'].itemsMap) {
+  for (const key in scoreboard['1'].itemsMap) {
     const input = scoreboard['1'].itemsMap[key].displayName.toString()
     const balMatch = input.match(/\$(\d{1,3}(?:,\d{3})*)/)
     if (balMatch) {
@@ -496,11 +493,11 @@ function getBalance(bot) {
 }
 
 // queue system
-function getCommand(commandName) {
+function getCommand (commandName) {
   return commands.find(command => command.name === commandName || command.aliases.includes(commandName))
 }
 
-export async function enqueueCommand(bot, commandName, commandArgs) {
+export async function enqueueCommand (bot, commandName, commandArgs) {
   const command = getCommand(commandName)
   if (devMode && !testers.includes(commandArgs[0])) {
     bot.whisper(commandArgs[0], 'The bot is in dev mode! Commands are disabled for now.')
@@ -513,20 +510,20 @@ export async function enqueueCommand(bot, commandName, commandArgs) {
   }
 
   if (command.skipQueue) {
-    command.execute(bot, commandArgs, commandArgs[0]);
+    command.execute(bot, commandArgs, commandArgs[0])
     return
   }
 
   if (commandQueue.find(command => command.username === commandArgs[0])) {
     if (commandQueue[0] && commandQueue[0].username === commandArgs[0]) {
-      bot.whisper(commandArgs[0], `You are already running a command!`)
+      bot.whisper(commandArgs[0], 'You are already running a command!')
       return
     } else {
       bot.whisper(commandArgs[0], `You are already in the queue! You are in position ${commandQueue.length - 1}`)
       return
     }
   } else if (commandArgs) {
-    commandQueue.push({ command, commandArgs, username: commandArgs[0] });
+    commandQueue.push({ command, commandArgs, username: commandArgs[0] })
     if (commandQueue.length > 1) {
       bot.whisper(commandArgs[0], `You have been added to the queue! You are in position ${commandQueue.length - 1}`)
     }
@@ -537,26 +534,26 @@ export async function enqueueCommand(bot, commandName, commandArgs) {
   }
 }
 
-async function executeNextCommand(bot) {
+async function executeNextCommand (bot) {
   if (commandQueue.length === 0) {
     return
   }
 
-  const { command, commandArgs } = commandQueue[0];
+  const { command, commandArgs } = commandQueue[0]
 
   try {
-    await command.execute(bot, commandArgs, commandArgs[0]);
+    await command.execute(bot, commandArgs, commandArgs[0])
   } catch (error) {
     console.error(error)
   }
 
-  commandQueue.shift();
+  commandQueue.shift()
 
   if (commandQueue.length > 0) {
     await executeNextCommand(bot)
   }
 }
 
-function formatInt(int) {
-  return int.toLocaleString("en-US")
+function formatInt (int) {
+  return int.toLocaleString('en-US')
 }

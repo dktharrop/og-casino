@@ -2,7 +2,7 @@ import CasinoBot from './casino-bot.js'
 import dotenv from 'dotenv'
 
 dotenv.config()
-const devMode = (process.env.DEVMODE === 'true') ? true : false
+const devMode = (process.env.DEVMODE === 'true')
 const accounts = JSON.parse(process.env.ACCOUNTS)
 
 if (devMode) {
@@ -22,7 +22,7 @@ startBot({
   port: '25565',
   version: '1.20',
   viewDistance: 3,
-  hideErrors: false,
+  hideErrors: false
 })
 
 export function startBot (botArgs) {

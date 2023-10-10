@@ -38,7 +38,7 @@ export async function editUser (username, editType, property, value) {
     userIndex = users.length - 1
   }
 
-  let user = users[userIndex]
+  const user = users[userIndex]
 
   if (editType === 'set') {
     user[property] = value
@@ -83,7 +83,7 @@ export async function getUUID (username) {
 export async function getUsername (uuid) {
   return await fetch(`https://sessionserver.mojang.com/session/minecraft/profile/${uuid}`)
     .then(response => response.json())
-    .then(data => data.name);
+    .then(data => data.name)
 }
 
 export async function createUser (uuid) {

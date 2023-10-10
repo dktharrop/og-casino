@@ -17,14 +17,12 @@ const options = {
   version: '1.20',
   viewDistance: 3,
   hideErrors: false,
-  tokensLocation: '../bot_tokens.json',
-  //Set to true if you want debug informations
-  tokensDebug: false
+  tokensLocation: '../bot_tokens.json'
 }
 
 startBot(options)
 
-function startBot(options) {
+function startBot (options) {
   const testBot = mineflayer.createBot(options)
   const rl = readline.createInterface({
     input: process.stdin,
@@ -52,7 +50,7 @@ function initEvents (testBot, rl) {
       return
     }
 
-    setTimeout(() => initBot(), 5000)
+    setTimeout(() => startBot(options), 5000)
   })
 
   testBot.on('error', (err) => {

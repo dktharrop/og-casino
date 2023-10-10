@@ -15,13 +15,13 @@ function randomIndex (list, currentSymbol) {
   }
 }
 
-export default async function slots (bot, username, devName) {
+export default async function slots (bot, username) {
   const symbols = ['🗡', '🏹', '🪓', '🔱', '🍖', '⭐']
   const rollCount = Math.ceil(Math.random() * 16) + 32
-  const result = { 
-    code: '', 
+  const result = {
+    code: '',
     symbols: []
- }
+  }
   bot.whisper(username, '------')
 
   for (let i = rollCount; i > 0; i--) {
@@ -31,7 +31,6 @@ export default async function slots (bot, username, devName) {
       if (result.symbols[0] === result.symbols[1]) {
         i = (Math.random() < 0.5) ? i + 1 : i
       }
-
     } else if (i < rollCount / 2) {
       result.symbols[2] = symbols[randomIndex(symbols, result.symbols[2])]
       result.symbols[1] = symbols[randomIndex(symbols, ' ')]
@@ -51,7 +50,7 @@ export default async function slots (bot, username, devName) {
     } else {
       result.code = 'slot3Any'
     }
-  } else if (result.symbols[0] == result.symbols[1] || result.symbols[1] == result.symbols[2]) {
+  } else if (result.symbols[0] === result.symbols[1] || result.symbols[1] === result.symbols[2]) {
     if (result.symbols[1] === '⭐') {
       result.code = 'slot2Star'
     } else {
