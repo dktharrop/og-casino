@@ -95,8 +95,17 @@ export async function createUser (uuid) {
     balance: 0,
     bet: 100,
     gains: 0,
-    loss: 0
-    // other properties
+    loss: 0,
+    bonus: 0,
+    lastDaily: 0,
+    slotSpins: 10,
+    slot3Star: 0,
+    slot3Any: 0,
+    slot2Star: 0,
+    slot2Any: 0,
+    slot1Star: 0,
+    diceRolls: 0,
+    diceWins: 0
   }
 
   users.push(newUser)
