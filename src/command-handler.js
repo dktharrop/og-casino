@@ -136,6 +136,17 @@ const commands = [
     }
   },
   {
+    name: 'discord',
+    aliases: ['dc'],
+    description: 'Join the discord for help',
+    skipQueue: true,
+    devOnly: false,
+    execute: (bot, args, username) => {
+      bot.whisper(username, 'Want updates on lotteries and giveaways? Found a bug? Need help? Join the discord!')
+      bot.whisper(username, 'https://discord.gg/zAAtQy3DG5')
+    }
+  },
+  {
     name: 'topgains',
     aliases: ['gainstop', 'tg', 'gt', 'topg', 'gtop'],
     description: 'Show a list of the highest earners',
@@ -174,6 +185,7 @@ const commands = [
       })
       bot.whisper(username, '------------------------')
       bot.whisper(username, 'Pay the bot to add funds to your account and get started!')
+      bot.whisper(username, 'Still confused? Join the discord for help! https://discord.gg/zAAtQy3DG5')
     }
   },
   {
