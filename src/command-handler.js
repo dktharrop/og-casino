@@ -176,44 +176,48 @@ const commands = [
       bot.whisper(username, 'Pay the bot to add funds to your account and get started!')
     }
   },
-  // {
-  //   name: 'lottery',
-  //   aliases: ['l'],
-  //   description: 'Enter the lottery',
-  //   skipQueue: true,
-  //   devOnly: false,
-  //   execute: async (bot, args, username) => {
-  //     const user = await jsonManager.getUser(username)
-  //     const purchase = args[1] ? Math.round(Number(args[1])) : false
-  //     const ticketCost = 1000
+  {
+    name: 'lottery',
+    aliases: ['l'],
+    description: 'Enter the lottery',
+    skipQueue: true,
+    devOnly: false,
+    execute: async (bot, args, username) => {
+      const user = await jsonManager.getUser(username)
+      const purchase = args[1] ? Math.round(Number(args[1])) : false
+      const ticketCost = 1000
 
-  //     if (isNaN(purchase) && !purchase !== false) {
-  //       bot.whisper(username, 'Please enter valid arguments!')
-  //       return
-  //     }
+      if (isNaN(purchase) && !purchase !== false) {
+        bot.whisper(username, 'Please enter valid arguments!')
+        return
+      }
 
-  //     if (purchase === false) {
-  //       bot.whisper(username, `Each ticket costs $${formatInt(ticketCost)}`)
-  //       bot.whisper(username, `You have ${user.tickets} tickets`)
-  //       const users = await jsonManager.getUsers()
-  //       for ()
-  //       return
-  //     }
+      if (purchase === false) {
+        const jackpot = jsonManager.getStats('jackpot')
+        bot.whisper(username, `Each ticket costs $${formatInt(ticketCost)}`)
+        bot.whisper(username, `You have ${user.tickets} ticket${(user.tickets === 1) ? '' : 's'}`)
+        bot.whisper(username, `The jackpot is currently $${formatInt(jackpot)}`)
+        bot.whisper(username, 'You can buy tickets with $lottery <amount>')
+        bot.whisper(username, 'Each ticket gives you another entry in the draw!')
+        return
+      }
 
-  //     const cost = ticketCost * purchase
+      const cost = ticketCost * purchase
 
-  //     if (user.balance < (cost)) {
-  //       bot.whisper(username, 'You can\'t afford that many tickets!')
-  //       return
-  //     }
+      if (user.balance < (cost)) {
+        bot.whisper(username, 'You can\'t afford that many tickets!')
+        return
+      }
 
-  //     await jsonManager.editUser(username, 'subtract', 'balance', cost)
-  //     await jsonManager.editUser(username, 'add', 'tickets', purchase)
-  //     bot.whisper(username, `You purchased ${purchase} tickets for $${formatInt(cost)}`)
-  //     bot.whisper(username, `You have ${user.tickets} tickets, good luck!`)
-  //     console.log(`${username} bought ${purchase} tickets`)
-  //   }
-  // },
+      await jsonManager.editUser(username, 'subtract', 'balance', cost)
+      await jsonManager.editUser(username, 'add', 'loss', cost)
+      await jsonManager.editUser(username, 'add', 'tickets', purchase)
+      jsonManager.editStats('add', 'jackpot', cost * 0.9)
+      bot.whisper(username, `You purchased ${purchase} ticket${(purchase === 1) ? '' : 's'} for $${formatInt(cost)}`)
+      bot.whisper(username, `You now have ${user.tickets + purchase} ticket${(user.tickets + purchase === 1) ? '' : 's'} total, good luck!`)
+      console.log(`${username} bought ${purchase} ticket${(purchase === 1) ? '' : 's'}`)
+    }
+  },
   {
     name: 'withdraw',
     aliases: ['w'],
@@ -399,7 +403,7 @@ const commands = [
     description: 'Cash out funds',
     skipQueue: true,
     devOnly: true,
-    execute: async (bot, args, username) => {
+    execute: (bot, args, username) => {
       const botBalance = getBalance(bot)
       const payment = args[1] ? Math.round(Number(args[1])) : botBalance
 
@@ -423,6 +427,26 @@ const commands = [
       } else {
         bot.whisper(username, 'Please enter a valid cashout! Can you afford it?')
       }
+    }
+  },
+  {
+    name: 'editstat',
+    aliases: ['es'],
+    description: 'Edit a stat',
+    skipQueue: true,
+    devOnly: true,
+    execute: (bot, args, username) => {
+      const stat = args[1]
+      const action = args[2]
+      const value = Number(args[3])
+
+      if (!stat || !action || isNaN(value)) {
+        bot.whisper(username, 'Please enter valid arguments!')
+        return
+      }
+
+      jsonManager.editStats(action, stat, value)
+      bot.whisper(username, `Edited ${stat} by ${value}`)
     }
   },
   {
@@ -456,6 +480,7 @@ const commands = [
       for (let i = 0; i < users.length; i++) {
         debt += users[i].balance
       }
+      debt += jsonManager.getStats('jackpot')
       bot.chat('/bal')
       bot.once('messagestr', (message) => {
         const balMatch = message.match(/^Balance: \$(\d{1,3}(?:,\d{3})*)/)

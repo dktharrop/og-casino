@@ -10,7 +10,7 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 const options = {
   username: account.username,
-  password: account.password,
+  // password: account.password,
   auth: 'microsoft',
   host: 'og-network.net',
   port: '25565',

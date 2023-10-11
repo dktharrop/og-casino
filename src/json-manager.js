@@ -98,6 +98,7 @@ export async function createUser (uuid) {
     loss: 0,
     bonus: false,
     lastDaily: 0,
+    tickets: 0,
     slotSpins: 10,
     slot3Star: 0,
     slot3Any: 0,
