@@ -67,8 +67,6 @@ export default class CasinoBot {
       } else {
         console.log(`[${bot.username}] Unhandled error: ${err}`)
       }
-      botManager.stopBot(0)
-      setTimeout(() => botManager.startBot(this.botArgs), 5000)
     })
 
     bot.on('message', (jsonMsg) => { // this is so bad fix this
