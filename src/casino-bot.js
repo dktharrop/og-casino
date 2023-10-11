@@ -51,12 +51,8 @@ export default class CasinoBot {
       console.log(`[${bot.username}] Disconnected: ${reason}`)
 
       if (reason === 'disconnect.quitting') {
-        return
+        console.log(`[${bot.username}] Quitting...`)
       }
-
-      // attempt reconnect
-      botManager.stopBot(0)
-      setTimeout(() => botManager.startBot(this.botArgs), 5000)
     })
 
     bot.on('error', (err) => {
@@ -64,9 +60,12 @@ export default class CasinoBot {
         console.log(`[${bot.username}] Failed to connect to ${err.address}:${err.port}`)
       } else if (err.details?.reason === 'UNAUTHORIZED') {
         this.botArgs.password = undefined
+        bot.end()
       } else {
         console.log(`[${bot.username}] Unhandled error: ${err}`)
       }
+      botManager.stopBot(0)
+      setTimeout(() => botManager.startBot(this.botArgs), 5000)
     })
 
     bot.on('message', (jsonMsg) => { // this is so bad fix this
