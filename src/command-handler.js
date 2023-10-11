@@ -178,42 +178,40 @@ const commands = [
   },
   // {
   //   name: 'lottery',
-  //   aliases: [ 'l' ],
+  //   aliases: ['l'],
   //   description: 'Enter the lottery',
   //   skipQueue: true,
   //   devOnly: false,
   //   execute: async (bot, args, username) => {
-  //     // switch (args[1]) {
+  //     const user = await jsonManager.getUser(username)
+  //     const purchase = args[1] ? Math.round(Number(args[1])) : false
+  //     const ticketCost = 1000
 
-  //     // const ticketCost = 1000
-  //     // const user = await jsonManager.getUser(username)
-  //     // const purchase = args[1] ? Math.round(Number(args[1])) : false
+  //     if (isNaN(purchase) && !purchase !== false) {
+  //       bot.whisper(username, 'Please enter valid arguments!')
+  //       return
+  //     }
 
-  //     // if (isNaN(purchase) && purchase !== false) {
-  //     //   bot.whisper(username, 'Please enter valid arguments!')
-  //     //   return
-  //     // }
+  //     if (purchase === false) {
+  //       bot.whisper(username, `Each ticket costs $${formatInt(ticketCost)}`)
+  //       bot.whisper(username, `You have ${user.tickets} tickets`)
+  //       const users = await jsonManager.getUsers()
+  //       for ()
+  //       return
+  //     }
 
-  //     // if (purchase === false) {
-  //     //   bot.whisper(username, `Each ticket costs $${formatInt(ticketCost)}`)
-  //     //   bot.whisper(username, `You have ${user.tickets} tickets`)
-  //     //   return
-  //     // }
+  //     const cost = ticketCost * purchase
 
-  //     // const cost = ticketCost * purchase
+  //     if (user.balance < (cost)) {
+  //       bot.whisper(username, 'You can\'t afford that many tickets!')
+  //       return
+  //     }
 
-  //     // if (user.balance < (cost)) {
-  //     //   bot.whisper(username, 'You do not cannot afford that many tickets!')
-  //     //   return
-  //     // }
-
-  //     // const tickets = await jsonManager.getStats('tickets')
-  //     // const newBalance = user.balance - purchase
-  //     // await jsonManager.editUser(username, 'set', 'balance', newBalance)
-  //     // await jsonManager.editStats('set', 'add', 'tickets', purchase)
-  //     // bot.whisper(username, `You purchased ${purchase} tickets. Good luck!`)
-  //     // console.log(`${username} bought ${purchase} tickets`)
-  //   // }
+  //     await jsonManager.editUser(username, 'subtract', 'balance', cost)
+  //     await jsonManager.editUser(username, 'add', 'tickets', purchase)
+  //     bot.whisper(username, `You purchased ${purchase} tickets for $${formatInt(cost)}`)
+  //     bot.whisper(username, `You have ${user.tickets} tickets, good luck!`)
+  //     console.log(`${username} bought ${purchase} tickets`)
   //   }
   // },
   {
