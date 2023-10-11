@@ -187,7 +187,7 @@ const commands = [
       const purchase = args[1] ? Math.round(Number(args[1])) : false
       const ticketCost = 1000
 
-      if (isNaN(purchase) && !purchase !== false) {
+      if ((isNaN(purchase) || purchase < 0) && purchase !== false) {
         bot.whisper(username, 'Please enter valid arguments!')
         return
       }
