@@ -103,7 +103,7 @@ export default class Crash {
         } else if (player.state === 'claimed') {
           bot.tell(player.username, `${this.multiplier}x | $${Math.floor(player.winnings.toLocaleString('en-US'))} Claimed! Could've won $${Math.floor(player.user.bet * this.multiplier).toLocaleString('en-US')}`)
         } else if (player.state === 'spectating' || player.state === 'joining') {
-          bot.tell(player.username, `${this.multiplier}x | You could've won $${(Math.floor(player.user.bet * this.multiplier).toLocaleString('en-US'))}`)
+          bot.tell(player.username, `${this.multiplier}x | Could've won $${(Math.floor(player.user.bet * this.multiplier).toLocaleString('en-US'))}`)
         }
       }
 
@@ -125,6 +125,7 @@ export default class Crash {
         await jsonManager.editUser(player.username, 'add', 'crashGains', player.winnings)
 
         console.log(`${player.username} won crash | $${player.user.bet} * ${(player.winnings / player.user.bet).toFixed(2)} $${player.winnings}`)
+        bot.tell('150cc', `${player.username} won crash | $${player.user.bet} * ${(player.winnings / player.user.bet).toFixed(2)} $${player.winnings}`)
 
         for (const other of this.players) {
           if (other.winnings > 0) bot.tell(player.username, `${other.username} won $${other.winnings.toLocaleString('en-US')}!`)
