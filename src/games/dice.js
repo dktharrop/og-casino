@@ -13,13 +13,13 @@ export default async function dice (bot, username, guessInt) {
   const rollCount = Math.ceil(Math.random() * 5) + 1
 
   for (let i = rollCount; i > 0; i--) {
-    bot.whisper(username, '|  ?  |')
+    bot.tell(username, '|  ?  |')
     await waitRatio(i)
   }
 
   const roll = symbols[Math.floor(Math.random() * symbols.length)]
 
-  bot.whisper(username, `- ${roll} -`)
+  bot.tell(username, `- ${roll} -`)
 
   return { roll, guess }
 }

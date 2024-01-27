@@ -1,0 +1,137 @@
+import * as jsonManager from '../json-manager.js'
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
+export default class Crash {
+  static players = [] // add max players per bot = 2
+
+  static crashPoint = 1
+  static multiplier = 0
+  static gameInterval = null
+
+  static getCrashPoint () {
+    const r = Math.random()
+
+    const e = 2 ** 32
+    const h = r * e
+
+    if (r < 0.08) return (1 + r).toFixed(2) // 8% chance of immediate crash
+
+    const crashPoint = Math.floor((100 * e - h) / (e - h)) / 100
+    if (crashPoint > 50) return (50 + Math.random()).toFixed(2)
+    return (crashPoint < 1) ? (crashPoint + 0.5 * (1 - crashPoint) + 0.5).toFixed(2) : crashPoint.toFixed(2)
+  }
+
+  static async joinGame (bot, username) {
+    if (this.players.find(player => player.username === username)) {
+      bot.tell(username, 'You have already joined the lobby!')
+      return
+    }
+    if (this.players.length >= 2) {
+      bot.tell(username, 'The lobby is full!')
+      return
+    }
+
+    const user = await jsonManager.getUser(username)
+    this.players.push({ user, username, state: 'spectating' }) // change to just bet instead of whole user?
+
+    bot.tell(username, 'You have joined the lobby!')
+    bot.tell(username, 'Type \'/w exit\' to leave the lobby.')
+  }
+
+  static async startGame (bot) {
+    this.multiplier = 0
+    this.crashPoint = 1
+
+    // await playGame (bot)
+
+    if (this.gameTimeout) clearTimeout(this.gameTimeout)
+    this.gameTimeout = setTimeout(async () => {
+      await Crash.playGame(bot)
+      await Crash.startGame(bot)
+
+      for (const player of this.players) {
+        player.winnings = 0
+        if (player.state === 'claimed') {
+          player.state = 'spectating'
+        }
+        bot.tell(player.username, '---------------------------')
+        bot.tell(player.username, 'Next game in 10 seconds!')
+        if (player.state === 'spectating') {
+          bot.tell(player.username, 'Type \'/r play\' to join next round!')
+        } else if (player.state === 'joining') {
+          bot.tell(player.username, 'You are playing this round!')
+          bot.tell(player.username, 'Type \'/r claim\' to before the crash!')
+        }
+        bot.tell(player.username, '---------------------------')
+        setTimeout(() => bot.tell(player.username, '3'), 7000)
+        setTimeout(() => bot.tell(player.username, '2'), 8000)
+        setTimeout(() => bot.tell(player.username, '1...'), 9000)
+      }
+    }, 10000)
+  }
+
+  static async playGame (bot) {
+    this.crashPoint = Crash.getCrashPoint()
+    this.multiplier = 0
+    // const user = await jsonManager.getUser(username)
+
+    for (const player of this.players) {
+      bot.tell(player.username, '---------------------------')
+      if (player.state === 'joining') {
+        player.state = 'playing'
+        bot.tell(player.username, 'YOU ARE PLAYING THIS ROUND')
+        jsonManager.editUser(player.username, 'subtract', 'balance', player.user.bet)
+        jsonManager.editUser(player.username, 'add', 'loss', player.user.bet)
+        jsonManager.editUser('add', 'crashGames', 1)
+        jsonManager.editUser('add', 'crashLoss', player.user.bet)
+      } else {
+        bot.tell(player.username, 'YOU ARE SPECTATING THIS ROUND')
+      }
+      bot.tell(player.username, '---------------------------')
+    }
+
+    let i = 1
+    while (i < this.crashPoint) {
+      const randomHundredth = Math.random() / 10
+      const potentialMultiplier = i + randomHundredth
+
+      if (potentialMultiplier >= this.crashPoint) {
+        this.multiplier = this.crashPoint
+      } else {
+        this.multiplier = potentialMultiplier.toFixed(2)
+      }
+
+      for (const player of this.players) {
+        if (player.state === 'playing') {
+          bot.tell(player.username, `${this.multiplier}x → $${Math.floor(player.user.bet * this.multiplier).toLocaleString('en-US')}`)
+        } else if (player.state === 'claimed') {
+          bot.tell(player.username, `${this.multiplier}x | $${player.winnings} Claimed! Could've won $${Math.floor(player.user.bet * this.multiplier).toLocaleString('en-US')}`)
+        } else if (player.state === 'spectating' || player.state === 'joining') {
+          bot.tell(player.username, `${this.multiplier}x | You could've won $${(Math.floor(player.user.bet * this.multiplier).toLocaleString('en-US'))}`)
+        }
+      }
+
+      i += 0.2
+      await sleep(1200 / Math.pow(i, 0.75))
+    }
+
+    this.multiplier = 0
+
+    for (const player of this.players) { // payouts
+      if (player.state === 'playing') {
+        player.state = 'spectating'
+      }
+      bot.tell(player.username, `${this.crashPoint}x | ❌ CRASHED! ❌`)
+      if (player.state === 'claimed') {
+        jsonManager.editUser(player.username, 'add', 'balance', player.winnings)
+        jsonManager.editUser(player.username, 'add', 'crashGains', player.winnings)
+      }
+      // if (player.state === 'playing') {
+      // }
+      for (const other of this.players) {
+        if (other.winnings > 0) bot.tell(player.username, `${other.username} won $${other.winnings.toLocaleString('en-US')}!`)
+      }
+    }
+    // add first time crash game disclaimer
+  }
+}

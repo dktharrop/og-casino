@@ -40,6 +40,10 @@ export async function editUser (username, editType, property, value) {
 
   const user = users[userIndex]
 
+  if (user[property] === undefined) {
+    user[property] = 0
+  }
+
   if (editType === 'set') {
     user[property] = value
   } else if (editType === 'add') {
@@ -106,7 +110,10 @@ export async function createUser (uuid) {
     slot2Any: 0,
     slot1Star: 0,
     diceRolls: 0,
-    diceWins: 0
+    diceWins: 0,
+    crashGames: 0,
+    crashGains: 0,
+    crashLoss: 0
   }
 
   users.push(newUser)
