@@ -98,9 +98,9 @@ export default class Crash {
       for (const player of this.players) {
         if (player.state === 'playing') {
           player.winnings = Math.floor(player.user.bet * this.multiplier) //
-          bot.tell(player.username, `${this.multiplier.toFixed(2)}x → $${Math.floor(player.winnings.toLocaleString('en-US'))}`)
+          bot.tell(player.username, `${this.multiplier.toFixed(2)}x → $${Math.floor(player.winnings).toLocaleString('en-US')}`)
         } else if (player.state === 'claimed') {
-          bot.tell(player.username, `${this.multiplier.toFixed(2)}x | $${Math.floor(player.winnings.toLocaleString('en-US'))} Claimed! Could've won $${Math.floor(player.user.bet * this.multiplier).toLocaleString('en-US')}`)
+          bot.tell(player.username, `${this.multiplier.toFixed(2)}x | $${Math.floor(player.winnings).toLocaleString('en-US')} Claimed!`)
         } else if (player.state === 'spectating' || player.state === 'joining') {
           bot.tell(player.username, `${this.multiplier.toFixed(2)}x | Could've won $${(Math.floor(player.user.bet * this.multiplier).toLocaleString('en-US'))}`)
         }
@@ -127,8 +127,10 @@ export default class Crash {
           await jsonManager.editUser(player.username, 'add', 'balance', player.winnings)
           await jsonManager.editUser(player.username, 'add', 'crashGains', player.winnings)
 
-          console.log(`${player.username} won crash | $${player.user.bet} * ${(player.winnings / player.user.bet).toFixed(2)} = $${player.winnings}`)
-          bot.tell('150cc', `${player.username} won crash | $${player.user.bet} * ${(player.winnings / player.user.bet).toFixed(2)} $${player.winnings}`)
+          console.log(`${player.username} won crash | $${player.user.bet.toLocaleString('en-US')} * ${(player.winnings / player.user.bet).toFixed(2)} = $${player.winnings}`)
+          bot.tell('150cc', `${player.username} won crash | $${player.user.bet.toLocaleString('en-US')} * ${(player.winnings / player.user.bet).toFixed(2)} $${player.winnings}`)
+
+          bot.tell(player.username, `Could've won $${(this.crashPoint * player.user.bet).toLocaleString('en-US')}!`)
         }
 
         for (const other of this.players) {
@@ -139,7 +141,7 @@ export default class Crash {
 
       bot.tell(player.username, 'Next game in 10 seconds!')
       if (player.state === 'spectating') {
-        bot.tell(player.username, 'Type \'/r play\' to join next round!')
+        bot.tell(player.username, '\'/r play\' to join next round!')
       } else if (player.state === 'joining') {
         bot.tell(player.username, 'You are playing this round!')
         bot.tell(player.username, 'Type \'/r claim\' to before the crash!')
