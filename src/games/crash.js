@@ -14,7 +14,7 @@ export default class Crash {
     const e = 2 ** 32
     const h = r * e
 
-    if (r < 0.08*1000) return 0 // 8% chance of immediate crash
+    if (r < 0.08) return 0 // 8% chance of immediate crash
     const crashPoint = Math.floor((100 * e - h) / (e - h)) / 100
     if (crashPoint > 50) return (50 + (10 * Math.random()))
     return (crashPoint < 1) ? (crashPoint + 0.5 * (1 - crashPoint) + 0.5) : crashPoint
