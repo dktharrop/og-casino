@@ -111,7 +111,7 @@ export default class Crash {
           player.winnings = Math.floor(player.user.bet * this.multiplier)
           bot.tell(player.username, `${this.multiplier}x → $${Math.floor(player.winnings.toLocaleString('en-US'))}`)
         } else if (player.state === 'claimed') {
-          bot.tell(player.username, `${this.multiplier}x | $${player.winnings.toLocaleString} Claimed! Could've won $${Math.floor(player.user.bet * this.multiplier).toLocaleString('en-US')}`)
+          bot.tell(player.username, `${this.multiplier}x | $${Math.floor(player.winnings.toLocaleString('en-US'))} Claimed! Could've won $${Math.floor(player.user.bet * this.multiplier).toLocaleString('en-US')}`)
         } else if (player.state === 'spectating' || player.state === 'joining') {
           bot.tell(player.username, `${this.multiplier}x | You could've won $${(Math.floor(player.user.bet * this.multiplier).toLocaleString('en-US'))}`)
         }
