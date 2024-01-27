@@ -124,6 +124,8 @@ export default class CasinoBot {
         if (message === 'c' || message.match(/claim/)) {
           if (crashPlayer.state === 'joining') {
             this.bot.tell(username, 'The game hasn\'t started yet!')
+          } else if (crashPlayer.state === 'claimed') {
+            this.bot.tell(username, 'You already claimed!')
           } else if (crashPlayer.state !== 'playing') {
             this.bot.tell(username, 'You are not playing this round!')
           } else {

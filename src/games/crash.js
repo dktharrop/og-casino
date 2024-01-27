@@ -49,25 +49,9 @@ export default class Crash {
       await Crash.playGame(bot)
       await Crash.startGame(bot)
 
-      for (const player of this.players) {
-        player.winnings = 0
-        player.user = await jsonManager.getUser(player.username)
-        if (player.state === 'claimed') {
-          player.state = 'spectating'
-        }
-        bot.tell(player.username, '---------------------------')
-        bot.tell(player.username, 'Next game in 10 seconds!')
-        if (player.state === 'spectating') {
-          bot.tell(player.username, 'Type \'/r play\' to join next round!')
-        } else if (player.state === 'joining') {
-          bot.tell(player.username, 'You are playing this round!')
-          bot.tell(player.username, 'Type \'/r claim\' to before the crash!')
-        }
-        bot.tell(player.username, '---------------------------')
-        setTimeout(() => bot.tell(player.username, '3'), 7000)
-        setTimeout(() => bot.tell(player.username, '2'), 8000)
-        setTimeout(() => bot.tell(player.username, '1...'), 9000)
-      }
+      // for (const player of this.players) {
+
+      // }
     }, 10000)
   }
 
@@ -77,6 +61,12 @@ export default class Crash {
     // const user = await jsonManager.getUser(username)
 
     for (const player of this.players) {
+      player.winnings = 0
+      player.user = await jsonManager.getUser(player.username)
+      if (player.state !== 'joining') {
+        player.state = 'spectating'
+      }
+
       bot.tell(player.username, '---------------------------')
       if (player.state === 'joining') {
         player.state = 'playing'
@@ -85,10 +75,10 @@ export default class Crash {
         console.log(`${player.username} is playing crash with a bet of ${player.user.bet}`)
         console.log(`The crash point will be ${this.crashPoint}`)
 
-        jsonManager.editUser(player.username, 'subtract', 'balance', player.user.bet)
-        jsonManager.editUser(player.username, 'add', 'loss', player.user.bet)
-        jsonManager.editUser('add', 'crashGames', 1)
-        jsonManager.editUser('add', 'crashLoss', player.user.bet)
+        await jsonManager.editUser(player.username, 'subtract', 'balance', player.user.bet)
+        await jsonManager.editUser(player.username, 'add', 'loss', player.user.bet)
+        await jsonManager.editUser(player.username, 'add', 'crashGames', 1)
+        await jsonManager.editUser(player.username, 'add', 'crashLoss', player.user.bet)
       } else {
         bot.tell(player.username, 'YOU ARE SPECTATING THIS ROUND')
       }
@@ -108,7 +98,7 @@ export default class Crash {
 
       for (const player of this.players) {
         if (player.state === 'playing') {
-          player.winnings = Math.floor(player.user.bet * this.multiplier)
+          player.winnings = Math.floor(player.user.bet * this.multiplier) //
           bot.tell(player.username, `${this.multiplier}x → $${Math.floor(player.winnings.toLocaleString('en-US'))}`)
         } else if (player.state === 'claimed') {
           bot.tell(player.username, `${this.multiplier}x | $${Math.floor(player.winnings.toLocaleString('en-US'))} Claimed! Could've won $${Math.floor(player.user.bet * this.multiplier).toLocaleString('en-US')}`)
@@ -125,20 +115,33 @@ export default class Crash {
 
     for (const player of this.players) { // payouts
       if (player.state === 'playing') {
+        console.log(`${player.username} lost crash | $${player.user.bet}`)
         player.state = 'spectating'
       }
       bot.tell(player.username, `${this.crashPoint}x | ❌ CRASHED! ❌`)
       if (player.state === 'claimed') {
-        jsonManager.editUser(player.username, 'add', 'balance', player.winnings)
-        jsonManager.editUser(player.username, 'add', 'crashGains', player.winnings)
+        player.state = 'spectating'
+        await jsonManager.editUser(player.username, 'add', 'balance', player.winnings)
+        await jsonManager.editUser(player.username, 'add', 'crashGains', player.winnings)
 
         console.log(`${player.username} won crash | $${player.user.bet} * ${(player.winnings / player.user.bet).toFixed(2)} $${player.winnings}`)
-        console.log(`The crash point will be ${this.crashPoint}`)
-      }
-      // if (player.state === 'playing') {
-      // }
-      for (const other of this.players) {
-        if (other.winnings > 0) bot.tell(player.username, `${other.username} won $${other.winnings.toLocaleString('en-US')}!`)
+
+        for (const other of this.players) {
+          if (other.winnings > 0) bot.tell(player.username, `${other.username} won $${other.winnings.toLocaleString('en-US')}!`)
+        }
+
+        bot.tell(player.username, '---------------------------')
+        bot.tell(player.username, 'Next game in 10 seconds!')
+        if (player.state === 'spectating') {
+          bot.tell(player.username, 'Type \'/r play\' to join next round!')
+        } else if (player.state === 'joining') {
+          bot.tell(player.username, 'You are playing this round!')
+          bot.tell(player.username, 'Type \'/r claim\' to before the crash!')
+        }
+        bot.tell(player.username, '---------------------------')
+        setTimeout(() => bot.tell(player.username, '3'), 7000)
+        setTimeout(() => bot.tell(player.username, '2'), 8000)
+        setTimeout(() => bot.tell(player.username, '1...'), 9000)
       }
     }
     // add first time crash game disclaimer

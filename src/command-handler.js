@@ -62,7 +62,7 @@ const commands = [
           return
         }
         const newBet = Math.round(Number(args[1]))
-        if (newBet >= 100 && newBet <= 250000) {
+        if (newBet >= 0 && newBet <= 250000) {
           await jsonManager.editUser(username, 'set', 'bet', newBet)
           bot.tell(username, `Your bet has been set to $${formatInt(newBet)}`)
           console.log(`${username} changed their bet to $${formatInt(newBet)}`)
