@@ -14,7 +14,7 @@ export default class Crash {
     const e = 2 ** 32
     const h = r * e
 
-    if (r < 0.08) return 0 // 8% chance of immediate crash
+    if (r < 0.08*1000) return 0 // 8% chance of immediate crash
     const crashPoint = Math.floor((100 * e - h) / (e - h)) / 100
     if (crashPoint > 50) return (50 + (10 * Math.random()))
     return (crashPoint < 1) ? (crashPoint + 0.5 * (1 - crashPoint) + 0.5) : crashPoint
@@ -110,27 +110,9 @@ export default class Crash {
       await sleep(1200 / Math.pow(i, 0.75))
     }
 
-    // fake
-    if (this.crashPoint < 1) { // make this thing a function // bruh just use toFixed when displaying adlfkjdlkfdj
-      await sleep(100)
-      this.multiplier = 1 + Math.random() / 10
-      this.crashPoint = this.multiplier
+    if (this.crashPoint < 1) this.crashPoint = 1 + Math.random() / 10
 
-      for (const player of this.players) {
-        if (player.state === 'playing') {
-          player.winnings = Math.floor(player.user.bet * this.multiplier)
-          bot.tell(player.username, `${this.multiplier.toFixed(2)}x → $${Math.floor(player.winnings.toLocaleString('en-US'))}`)
-        } else if (player.state === 'claimed') {
-          bot.tell('150cc', 'something has gone horribly wrong (crash < 1)')
-          console.log('something has gone horribly wrong (crash < 1)')
-        } else if (player.state === 'spectating' || player.state === 'joining') {
-          bot.tell(player.username, `${this.multiplier.toFixed(2)}x | Could've won $${(Math.floor(player.user.bet * this.multiplier).toLocaleString('en-US'))}`)
-        }
-        player.state = 'spectating'
-      }
-    }
-
-    // this.multiplier = 0
+    this.multiplier = 0
 
     for (const player of this.players) { // payouts
       if (player.state === 'playing') { // no claim
@@ -138,10 +120,10 @@ export default class Crash {
         player.state = 'spectating'
       }
       bot.tell(player.username, `${this.crashPoint.toFixed(2)}x | ❌ CRASHED! ❌`)
-      this.multiplier = 0
       if (player.state === 'claimed') {
         if (this.crashPoint >= 1) {
           player.state = 'spectating'
+          await jsonManager.editUser(player.username, 'add', 'gains', player.winnings)
           await jsonManager.editUser(player.username, 'add', 'balance', player.winnings)
           await jsonManager.editUser(player.username, 'add', 'crashGains', player.winnings)
 
