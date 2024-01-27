@@ -95,8 +95,6 @@ export default class CasinoBot {
       const crashPlayer = casinoManager.games.crash.players.find(player => player.username === username)
       if (crashPlayer) {
         if (message === 'p' || message.match(/play/)) {
-          console.log(crashPlayer.user.balance, crashPlayer.user.bet)
-
           if (crashPlayer.user.balance < crashPlayer.user.bet) {
             this.bot.tell(username, 'You can\'t afford the bet!')
             return
@@ -141,8 +139,7 @@ export default class CasinoBot {
 
     this.bot.on('command', (commandName, commandArgs) => {
       if (commandName !== 'invalid' && !commandArgs[0].match(/^\*/)) {
-        console.log(commandName)
-        console.log(commandArgs)
+        console.log(`Command $${commandName} run | ${commandArgs}`)
         commandHandler.enqueueCommand(this.bot, commandName, commandArgs)
       }
     })

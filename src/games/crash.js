@@ -51,6 +51,7 @@ export default class Crash {
 
       for (const player of this.players) {
         player.winnings = 0
+        player.user = await jsonManager.getUser(player.username)
         if (player.state === 'claimed') {
           player.state = 'spectating'
         }
@@ -80,6 +81,10 @@ export default class Crash {
       if (player.state === 'joining') {
         player.state = 'playing'
         bot.tell(player.username, 'YOU ARE PLAYING THIS ROUND')
+
+        console.log(`${player.username} is playing crash with a bet of ${player.user.bet}`)
+        console.log(`The crash point will be ${this.crashPoint}`)
+
         jsonManager.editUser(player.username, 'subtract', 'balance', player.user.bet)
         jsonManager.editUser(player.username, 'add', 'loss', player.user.bet)
         jsonManager.editUser('add', 'crashGames', 1)
@@ -103,9 +108,10 @@ export default class Crash {
 
       for (const player of this.players) {
         if (player.state === 'playing') {
-          bot.tell(player.username, `${this.multiplier}x → $${Math.floor(player.user.bet * this.multiplier).toLocaleString('en-US')}`)
+          player.winnings = Math.floor(player.user.bet * this.multiplier)
+          bot.tell(player.username, `${this.multiplier}x → $${Math.floor(player.winnings.toLocaleString('en-US'))}`)
         } else if (player.state === 'claimed') {
-          bot.tell(player.username, `${this.multiplier}x | $${player.winnings} Claimed! Could've won $${Math.floor(player.user.bet * this.multiplier).toLocaleString('en-US')}`)
+          bot.tell(player.username, `${this.multiplier}x | $${player.winnings.toLocaleString} Claimed! Could've won $${Math.floor(player.user.bet * this.multiplier).toLocaleString('en-US')}`)
         } else if (player.state === 'spectating' || player.state === 'joining') {
           bot.tell(player.username, `${this.multiplier}x | You could've won $${(Math.floor(player.user.bet * this.multiplier).toLocaleString('en-US'))}`)
         }
@@ -125,6 +131,9 @@ export default class Crash {
       if (player.state === 'claimed') {
         jsonManager.editUser(player.username, 'add', 'balance', player.winnings)
         jsonManager.editUser(player.username, 'add', 'crashGains', player.winnings)
+
+        console.log(`${player.username} won crash | $${player.user.bet} * ${(player.winnings / player.user.bet).toFixed(2)} $${player.winnings}`)
+        console.log(`The crash point will be ${this.crashPoint}`)
       }
       // if (player.state === 'playing') {
       // }
