@@ -62,12 +62,12 @@ const commands = [
           return
         }
         const newBet = Math.round(Number(args[1]))
-        if (newBet >= 0 && newBet <= 250000) {
+        if (newBet >= 50 && newBet <= 250000) {
           await jsonManager.editUser(username, 'set', 'bet', newBet)
           bot.tell(username, `Your bet has been set to $${formatInt(newBet)}`)
           console.log(`${username} changed their bet to $${formatInt(newBet)}`)
         } else if (newBet < 100) {
-          bot.tell(username, 'The minimum bet is $100!')
+          bot.tell(username, 'The minimum bet is $50!')
         } else if (newBet > 250000) {
           bot.tell(username, 'The maximum bet is $250,000!')
         } else {
@@ -267,6 +267,11 @@ const commands = [
 
       if (!user) {
         bot.tell(username, 'User not found!')
+        return
+      }
+
+      if (casinoManager.games.crash.players.find(player => player.username === username)) {
+        bot.tell(username, 'You can\'t withdraw while playing crash!')
         return
       }
 
