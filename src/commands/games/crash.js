@@ -94,6 +94,12 @@ class Crash {
 
       this.casinoBot.bot.tell(player.username, '---------------------------')
       if (player.state === 'joining') {
+        if (player.user.bet > player.user.balance) {
+          this.casinoBot.bot.tell(player.username, 'You do not have enough money to play!')
+          player.state = 'spectating'
+          continue
+        }
+
         player.state = 'playing'
 
         casinoManager.setUserStatus(player.username, 'crash')
