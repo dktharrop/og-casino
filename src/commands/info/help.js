@@ -9,14 +9,14 @@ export default {
   execute: (casinoBot, args, username) => {
     if (!args[0]) {
       casinoBot.bot.tell(username, '---------- HELP ---------')
-      casinoBot.bot.tell(username, 'Commands are split into categories')
-      casinoBot.bot.tell(username, 'Use $help <category> to see commands in that category')
+      casinoBot.bot.tell(username, 'Use $help <category>')
+      casinoBot.bot.tell(username, 'to see commands in that category')
       casinoBot.bot.tell(username, '-------------------------')
-      casinoBot.bot.tell(username, 'games | Commands for playing games')
-      casinoBot.bot.tell(username, 'info | Commands with general info')
-      casinoBot.bot.tell(username, 'stats | Commands for viewing stats')
-      casinoBot.bot.tell(username, 'user | Commands for managing your account')
-      casinoBot.bot.tell(username, 'utility | Commands for misc. things')
+      casinoBot.bot.tell(username, 'games | Play some casino games!')
+      casinoBot.bot.tell(username, 'info | See general info')
+      casinoBot.bot.tell(username, 'stats | View leaderboards or stats')
+      casinoBot.bot.tell(username, 'user | Manage your account')
+      casinoBot.bot.tell(username, 'utillity | Commands for misc. things')
     }
 
     // Filter commands based on the argument provided

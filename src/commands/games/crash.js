@@ -4,7 +4,7 @@ import * as jsonManager from '../../json-manager.js'
 export default {
   name: 'crash',
   aliases: ['cr'],
-  description: 'Claim to win... before the crash!',
+  description: 'Claim before the crash!',
   skipQueue: 'true',
   devOnly: false,
   execute: async (casinoBot, args, username) => {

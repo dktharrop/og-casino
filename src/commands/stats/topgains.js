@@ -3,7 +3,7 @@ import * as jsonManager from '../../json-manager.js'
 export default {
   name: 'topgains',
   aliases: ['gainstop', 'tg', 'gt', 'topg', 'gtop'],
-  description: 'Shows the highest earners',
+  description: 'Shows highest earners',
   skipQueue: false,
   devOnly: false,
   execute: async (casinoBot, args, username) => {

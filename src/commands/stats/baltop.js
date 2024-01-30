@@ -3,7 +3,7 @@ import * as jsonManager from '../../json-manager.js'
 export default {
   name: 'baltop',
   aliases: ['bt'],
-  description: 'Show a list of top balances',
+  description: 'Shows top balances',
   skipQueue: false,
   devOnly: false,
   execute: async (casinoBot, args, username, gamemode) => {

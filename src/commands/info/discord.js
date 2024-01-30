@@ -1,7 +1,7 @@
 export default {
   name: 'discord',
   aliases: ['dc'],
-  description: 'Join the discord for help',
+  description: 'Join the discord!',
   skipQueue: true,
   devOnly: false,
   execute: (casinoBot, args, username) => {
