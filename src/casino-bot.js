@@ -82,7 +82,7 @@ export default class CasinoBot {
       this.log(`Joined gamemode: ${this.gamemode}`)
 
       if (this.bot.username === 'VegasCasino3' || this.bot.username === '200cc') {
-        this.joinGamemode('smp')
+        this.joinGamemode('rpg')
       } else {
         this.joinGamemode('smp')
       }
