@@ -6,7 +6,7 @@ export default {
   aliases: ['cr'],
   description: 'Claim the jackpot before the crash!',
   skipQueue: 'true',
-  devOnly: true,
+  devOnly: false,
   execute: async (casinoBot, args, username) => {
     if (!casinoBot.crash) {
       casinoBot.crash = new Crash(casinoBot)
