@@ -82,7 +82,7 @@ export default class CasinoBot {
       this.log(`Joined gamemode: ${this.gamemode}`)
 
       if (this.bot.username === 'VegasCasino3' || this.bot.username === '200cc') {
-        this.joinGamemode('rpg')
+        this.joinGamemode('smp')
       } else {
         this.joinGamemode('smp')
       }
@@ -173,6 +173,7 @@ export default class CasinoBot {
           } else if (crashPlayer.state !== 'playing') {
             this.bot.tell(username, 'You are not playing this round!')
           } else {
+            this.log(`${username} claimed at ${this.crash.multiplier.toFixed(2)}x`)
             crashPlayer.state = 'claimed'
           }
         }
@@ -291,9 +292,16 @@ export default class CasinoBot {
     const scoreboard = this.bot.scoreboard
     for (const key in scoreboard['1'].itemsMap) {
       const input = scoreboard['1'].itemsMap[key].displayName.toString()
+      // look for the scoreboard key that contains the string '◆ ᴍᴏɴᴇʏ: $15' and get the money
+      const moneyMatch = input.match(/◆ ᴍᴏɴᴇʏ: \$([0-9,]+)/)
+      if (moneyMatch) {
+        const money = parseInt(moneyMatch[1].replace(/,/g, ''))
+        return money
+      }
       const balMatch = input.match(/\$(\d{1,3}(?:,\d{3})*)/)
       if (balMatch) {
-        return Math.floor(parseInt(balMatch[1].replace(/[^0-9]/g, '')))
+        const bal = parseInt(balMatch[1].replace(/,/g, ''))
+        return bal
       }
     }
     console.error('Failed to get balance!')

@@ -46,9 +46,9 @@ class Crash {
     const e = 2 ** 32
     const h = r * e
 
-    if (r < 0.08) return 0 // 8% chance of immediate crash
-    const crashPoint = Math.floor((100 * e - h) / (e - h)) / 100
-    if (crashPoint > 50) return (50 + (10 * Math.random()))
+    if (r < 0.10) return 0 // 10% chance of immediate crash
+    const crashPoint = Math.floor((100 * e - h) / (e - h)) / 105
+    if (crashPoint > 40) return (40 + (10 * Math.random()))
     return (crashPoint < 1) ? (crashPoint + 0.5 * (1 - crashPoint) + 0.5) : crashPoint
   }
 
@@ -108,7 +108,7 @@ class Crash {
         const user = await jsonManager.getUserFromUUID(player.uuid, this.casinoBot.gamemode)
 
         this.casinoBot.log(`${player.username} is playing crash with a bet of ${user.bet}`)
-        this.casinoBot.log(`The crash point will be ${this.crashPoint}`)
+        this.casinoBot.log(`The crash point will be ${this.crashPoint.toFixed(2)}`)
 
         await jsonManager.editUser(player.username, 'subtract', 'balance', user.bet, this.casinoBot.gamemode)
         await jsonManager.editUser(player.username, 'add', 'loss', user.bet, this.casinoBot.gamemode)
@@ -172,15 +172,16 @@ class Crash {
           await jsonManager.editUser(player.username, 'add', 'crashGains', player.winning, this.casinoBot.gamemode)
 
           this.casinoBot.log(`${player.username} won crash | $${user.bet.toLocaleString('en-US')} * ${(player.winnings / user.bet).toFixed(2)} = $${player.winnings}`)
-          this.casinoBot.bot.tell('150cc', `${player.username} won crash | $${user.bet.toLocaleString('en-US')} * ${(player.winnings / user.bet).toFixed(2)} $${player.winnings}`)
+          this.casinoBot.bot.tell('150cc', `${player.username} won crash | $${user.bet.toLocaleString('en-US')} * ${(player.winnings / user.bet).toFixed(2)} = $${player.winnings}`)
 
           this.casinoBot.bot.tell(player.username, `Could've won $${(this.crashPoint * user.bet).toLocaleString('en-US')}!`)
         }
-
-        for (const other of this.players) {
-          if (other.winnings > 0) this.casinoBot.bot.tell(player.username, `${other.username} won $${other.winnings.toLocaleString('en-US')}!`)
-        }
       }
+
+      for (const other of this.players) {
+        if (other.winnings > 0) this.casinoBot.bot.tell(player.username, `${other.username} won $${other.winnings.toLocaleString('en-US')}!`)
+      }
+
       this.casinoBot.bot.tell(player.username, '---------------------------')
 
       this.casinoBot.bot.tell(player.username, 'Next game in 10 seconds!')

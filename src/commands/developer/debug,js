@@ -5,7 +5,7 @@ export default {
   skipQueue: true,
   devOnly: true,
   execute: async (casinoBot, args, username) => {
-    casinoBot.bot.tell(username, 'disabled for now')
+    // casinoBot.bot.tell(username, 'disabled for now')
     // print out any variables you want to debug
     // example: $debug casinoBot.bot.gamemode prints out casinoBot.bot.gamemode
 

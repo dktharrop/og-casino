@@ -46,6 +46,7 @@ export default {
       casinoBot.bot.chat(`/pay ${username} ${withdrawl}`)
       casinoBot.bot.tell(casinoBot.dev, `Withdrew ${withdrawl.toLocaleString('en-US')} from ${username} ($${user.balance.toLocaleString('en-US')} to $${newBalance.toLocaleString('en-US')})`)
       casinoBot.log(`${username} withdrew $${withdrawl.toLocaleString('en-US')} (from $${user.balance.toLocaleString('en-US')} to $${newBalance.toLocaleString('en-US')})`)
+      casinoBot.log(`Bot balance: $${casinoBot.getBalance().toLocaleString('en-US')}`)
     } else {
       casinoBot.bot.tell(username, 'Please enter a valid withdrawal! Can you afford it?')
     }
