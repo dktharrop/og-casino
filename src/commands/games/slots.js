@@ -3,7 +3,7 @@ import * as jsonManager from '../../json-manager.js'
 export default {
   name: 'slots',
   aliases: ['s'],
-  description: 'A slot machine',
+  description: 'A slot machine | ⁷ ⁷ ⁷ |',
   skipQueue: false,
   devOnly: false,
   execute: async (casinoBot, args, username) => {

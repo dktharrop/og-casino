@@ -196,7 +196,7 @@ export default class CasinoBot {
       }
 
       if (commandName !== 'invalid' && !username.match(/^\*/)) {
-        this.log(`Command $${commandName} run | ${commandArgs}`)
+        this.log(`${username} ran $${commandName} ${commandArgs}`)
         commandHandler.enqueueCommand(this, commandName, commandArgs, username)
       }
     })

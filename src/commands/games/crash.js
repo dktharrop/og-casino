@@ -4,7 +4,7 @@ import * as jsonManager from '../../json-manager.js'
 export default {
   name: 'crash',
   aliases: ['cr'],
-  description: 'Claim the jackpot before the crash!',
+  description: 'Claim to win... before the crash!',
   skipQueue: 'true',
   devOnly: false,
   execute: async (casinoBot, args, username) => {
@@ -95,7 +95,7 @@ class Crash {
       this.casinoBot.bot.tell(player.username, '---------------------------')
       if (player.state === 'joining') {
         if (player.user.bet > player.user.balance) {
-          this.casinoBot.bot.tell(player.username, 'You do not have enough money to play!')
+          this.casinoBot.bot.tell(player.username, 'You can\'t afford the bet!')
           player.state = 'spectating'
           continue
         }

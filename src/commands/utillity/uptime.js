@@ -1,7 +1,7 @@
 export default {
   name: 'uptime',
   aliases: ['u', 'up', 'ut'],
-  description: 'See the ',
+  description: 'Shows total time online',
   skipQueue: true,
   devOnly: false,
   execute: (casinoBot, args, username) => {
