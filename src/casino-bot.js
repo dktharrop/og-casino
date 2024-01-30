@@ -70,18 +70,12 @@ export default class CasinoBot {
       if (this.bot.game.height === 256) {
         this.gamemode = 'hub'
       } else if (this.bot.game.height === 384) {
-        let itemName = this.bot.inventory?.slots[9]?.customName
-        if (itemName) {
-          itemName = JSON.parse(itemName)
-        } else {
-          console.error('The ninth slot is empty')
-        }
-
-        if ('extra' in itemName) {
+        const itemName = JSON.parse(this.bot.inventory.slots[9].customName)
+        if (itemName === null) {
+          throw new Error('The ninth slot is empty.')
+        } else if ('extra' in itemName) {
           this.gamemode = itemName.extra[0].text
-        }
-
-        if ('text' in itemName) {
+        } else {
           this.gamemode = itemName.text
         }
       }
