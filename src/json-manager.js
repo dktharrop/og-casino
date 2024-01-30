@@ -1,44 +1,57 @@
 import fs from 'fs'
 import fetch from 'node-fetch'
 
-export function editStats (editType, property, value) {
+export function editStats (editType, property, value, gamemode) {
   const statsData = fs.readFileSync('stats.json')
   const stats = JSON.parse(statsData)
 
+  if (!stats[gamemode]) {
+    console.error(`Game mode ${gamemode} does not exist in stats.json`)
+    return
+  }
+
   if (editType === 'set') {
-    stats[property] = value
+    stats[gamemode][property] = value
   } else if (editType === 'add') {
-    stats[property] += value
+    stats[gamemode][property] += value
   } else if (editType === 'subtract') {
-    stats[property] -= value
+    stats[gamemode][property] -= value
   }
 
   const updatedData = JSON.stringify(stats, null, 2)
   fs.writeFileSync('stats.json', updatedData)
 }
 
-export function getStats (stat) {
+export function getStats (stat, gamemode) {
   const statsData = fs.readFileSync('stats.json')
   const stats = JSON.parse(statsData)
 
-  return stats[stat]
+  if (!stats[gamemode]) {
+    console.error(`Game mode ${gamemode} does not exist in stats.json`)
+    return
+  }
+
+  return stats[gamemode][stat]
 }
 
-export async function editUser (username, editType, property, value) {
+export async function editUser (username, editType, property, value, gamemode) {
   const usersData = fs.readFileSync('users.json')
   const users = JSON.parse(usersData)
+  if (!['smp', 'rpg'].includes(gamemode) || !Array.isArray(users[gamemode])) {
+    throw new Error(`Invalid gamemode: ${gamemode}`)
+  }
 
   const uuid = await getUUID(username)
 
-  let userIndex = users.findIndex(user => user.uuid === uuid)
+  let userIndex = users[gamemode].findIndex(user => user.uuid === uuid)
 
   if (userIndex === -1) {
-    const newUser = await createUser(uuid)
-    users.push(newUser)
-    userIndex = users.length - 1
+    const newUser = await createUser(uuid, gamemode)
+    users[gamemode].push(newUser)
+    userIndex = users[gamemode].length - 1
   }
 
-  const user = users[userIndex]
+  const user = users[gamemode][userIndex]
 
   if (user[property] === undefined) {
     user[property] = 0
@@ -52,30 +65,34 @@ export async function editUser (username, editType, property, value) {
     user[property] -= value
   }
 
-  users[userIndex] = user
+  users[gamemode][userIndex] = user
 
   const updatedData = JSON.stringify(users, null, 2)
   fs.writeFileSync('users.json', updatedData)
 }
 
-export async function getUser (username) {
+export async function getUser (username, gamemode) {
+  const uuid = await getUUID(username)
+  return await getUserFromUUID(uuid, gamemode)
+}
+
+export async function getUserFromUUID (uuid, gamemode) {
   const usersData = fs.readFileSync('users.json')
   const users = JSON.parse(usersData)
 
-  const uuid = await getUUID(username)
-
-  const user = users.find(user => user.uuid === uuid)
+  const user = users[gamemode].find(user => user.uuid === uuid)
 
   if (user) {
     return user
   } else {
-    return await createUser(uuid)
+    return await createUser(uuid, gamemode)
   }
 }
 
-export async function getUsers () {
+export async function getUsers (gamemode) {
   const usersData = fs.readFileSync('users.json')
-  return JSON.parse(usersData)
+  const users = JSON.parse(usersData)
+  return users[gamemode]
 }
 
 export async function getUUID (username) {
@@ -90,7 +107,7 @@ export async function getUsername (uuid) {
     .then(data => data.name)
 }
 
-export async function createUser (uuid) {
+export async function createUser (uuid, gamemode) {
   const usersData = fs.readFileSync('users.json')
   const users = JSON.parse(usersData)
 
@@ -116,7 +133,7 @@ export async function createUser (uuid) {
     crashLoss: 0
   }
 
-  users.push(newUser)
+  users[gamemode].push(newUser)
 
   const updatedData = JSON.stringify(users, null, 2)
   fs.writeFileSync('users.json', updatedData)

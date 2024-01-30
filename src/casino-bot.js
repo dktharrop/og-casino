@@ -9,64 +9,101 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 export default class CasinoBot {
   // Constructor
   constructor (botArgs) {
-    const botOptions = {
-      username: botArgs.username,
-      auth: botArgs.auth,
-      host: botArgs.host,
-      port: botArgs.port,
-      version: botArgs.version,
-      viewDistance: botArgs.viewDistance,
-      hideErrors: botArgs.hideErrors
-    }
-    if (botArgs.password) {
-      botOptions.password = botArgs.password
-    }
+    this.bot = mineflayer.createBot(botArgs)
 
-    this.bot = mineflayer.createBot(botOptions)
     this.rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout
     })
 
-    this.bot.tell = (username, message) => {
+    this.bot.tell = async (username, message) => {
+      // Store for rate limiting
+      this.rateLimitStore = this.rateLimitStore || {}
+
+      const now = Date.now()
+      const lastMessageInfo = this.rateLimitStore[username] || { time: 0, count: 0, warned: false }
+      const timeSinceLastMessage = now - lastMessageInfo.time
+
+      // If the user has received 100 messages in the last second, ignore the message
+      if (timeSinceLastMessage < 1000 && lastMessageInfo.count >= 200) {
+        if (!lastMessageInfo.warned) {
+          this.log(`Rate limit exceeded for user ${username}. Ignoring subsequent messages for 1 second.`)
+          this.bot.whisper(username, '| Rate limit exceeded. Ignoring subsequent messages for 1 second.')
+          lastMessageInfo.warned = true
+        }
+        return
+      }
+
+      // If it's been more than a second since the last message, reset the count and the warning flag
+      if (timeSinceLastMessage >= 1000) {
+        lastMessageInfo.count = 0
+        lastMessageInfo.warned = false
+      }
+
+      // Update the last message time and increment the count for the user
+      lastMessageInfo.time = now
+      lastMessageInfo.count++
+
+      this.rateLimitStore[username] = lastMessageInfo
+
       this.bot.whisper(username, `| ${message}`)
     }
-
-    this.botArgs = botArgs
-    // this.initEvents(this.bot, this.rl)
   }
 
-  init () {
+  async init () {
     this.rl.on('line', (input) => {
       this.bot.chat(input)
     })
 
     this.bot.on('login', () => {
       const botSocket = this.bot._client.socket
-      console.log(`[${this.bot.username}] Logged in to ${botSocket.server ? botSocket.server : botSocket._host}`)
+      this.log(`Logged in to ${botSocket.server ? botSocket.server : botSocket._host}`)
     })
 
     this.bot.on('spawn', async () => {
-      console.log(`[${this.bot.username}] Spawned in at ${this.bot.entity.position.x}, ${this.bot.entity.position.y}, ${this.bot.entity.position.z}`)
-      this.joinSMP(this.bot)
+      this.log(`Spawned in at ${this.bot.entity.position.x}, ${this.bot.entity.position.y}, ${this.bot.entity.position.z}`)
+
+      this.gamemode = 'unknown'
+
+      await sleep(1000)
+
+      if (this.bot.game.height === 256) {
+        this.gamemode = 'hub'
+      } else if (this.bot.game.height === 384) {
+        const itemName = JSON.parse(this.bot.inventory.slots[9].customName)
+        if (itemName === null) {
+          throw new Error('The ninth slot is empty.')
+        } else if ('extra' in itemName) {
+          this.gamemode = itemName.extra[0].text
+        } else {
+          this.gamemode = itemName.text
+        }
+      }
+      this.log(`Joined gamemode: ${this.gamemode}`)
+
+      if (this.bot.username === 'VegasCasino3' || this.bot.username === '200cc') {
+        this.joinGamemode('rpg')
+      } else {
+        this.joinGamemode('smp')
+      }
     })
 
     this.bot.on('end', (reason) => {
-      console.log(`[${this.bot.username}] Disconnected: ${reason}`)
+      this.log(`[${this.bot.username}] Disconnected: ${reason}`)
 
       if (reason === 'disconnect.quitting') {
-        console.log(`[${this.bot.username}] Quitting...`)
+        this.log(`[${this.bot.username}] Quitting...`)
       }
     })
 
     this.bot.on('error', (err) => {
       if (err.code === 'ECONNREFUSED') {
-        console.log(`[${this.bot.username}] Failed to connect to ${err.address}:${err.port}`)
+        this.log(`[${this.bot.username}] Failed to connect to ${err.address}:${err.port}`)
       } else if (err.details?.reason === 'UNAUTHORIZED') {
         this.botArgs.password = undefined
         this.bot.end()
       } else {
-        console.log(`[${this.bot.username}] Unhandled error: ${err}`)
+        this.log(`[${this.bot.username}] Unhandled error: ${err}`)
       }
       casinoManager.stopBot(0)
       setTimeout(() => casinoManager.startBot(this.botArgs), 5000)
@@ -81,21 +118,28 @@ export default class CasinoBot {
       //
     })
 
-    this.bot.on('tell', (username, message) => { // why message.username?
+    this.bot.on('tell', (username, message, origin) => {
+      if (origin !== this.gamemode) {
+        this.bot.tell(username, 'Wrong server!')
+        this.bot.tell(username, `Current location: ${this.gamemode.toUpperCase()}`)
+        return
+      }
+
       if (username.match(/^\*/)) {
         this.bot.tell(username, 'Sorry! Bedrock players can\'t use the bot right now...')
         this.bot.tell(username, 'This is because bedrock playres don\'t have java UUIDs, so I can\'t store their data properly')
         this.bot.tell(username, 'Addotonally, bedrock does not properly display the emoji used by the bot')
-        console.log(`${username} just learned that bedrockers are second class citizens...`)
+        this.log(`${username} just learned that bedrockers are second class citizens...`)
       } else if (message.match(/^-|^\/|^!|^&|^#/)) {
         this.bot.tell(username, 'Invalid prefix! Use \'$\' to run commands. For example:')
         this.bot.tell(username, '/msg VegasCasino1 $help')
       }
 
-      const crashPlayer = casinoManager.games.crash.players.find(player => player.username === username)
+      const crashPlayer = this.crash?.players.find(player => player.username === username)
       if (crashPlayer) {
+        const user = jsonManager.getUserFromUUID(crashPlayer.uuid, this.gamemode)
         if (message === 'p' || message.match(/play/)) {
-          if (crashPlayer.user.balance < crashPlayer.user.bet) {
+          if (user.balance < user.bet) {
             this.bot.tell(username, 'You can\'t afford the bet!')
             return
           }
@@ -107,10 +151,10 @@ export default class CasinoBot {
           }
         }
         if (message === 'l' || message.match(/leave/)) {
-          if (crashPlayer.state === 'playing' && casinoManager.games.crash.multiplier === 0) {
+          if (crashPlayer.state === 'playing' && this.crash.multiplier === 0) {
             crashPlayer.state = 'spectating'
             this.bot.tell(username, 'You are now spectating the next round!')
-          } else if (crashPlayer.state === 'playing' && casinoManager.games.crash.multiplier > 0) {
+          } else if (crashPlayer.state === 'playing' && this.crash.multiplier > 0) {
             this.bot.tell(username, 'You can\'t leave the game after it has started!')
           } else {
             this.bot.tell(username, 'You are already spectating!')
@@ -119,7 +163,7 @@ export default class CasinoBot {
         }
         if (message === 'e' || message.match(/exit/)) { // create methods for thsee things
           this.bot.tell(username, 'You have stopped playing!')
-          casinoManager.games.crash.players = casinoManager.games.crash.players.filter(player => player.username !== username) // and this thing
+          this.crash.players = this.crash.players.filter(player => player.username !== username) // and this thing
         }
         if (message === 'c' || message.match(/claim/)) {
           if (crashPlayer.state === 'joining') {
@@ -139,22 +183,44 @@ export default class CasinoBot {
       this.makePayment(username, payment)
     })
 
-    this.bot.on('command', (commandName, commandArgs) => {
-      if (commandName !== 'invalid' && !commandArgs[0].match(/^\*/)) {
-        console.log(`Command $${commandName} run | ${commandArgs}`)
-        commandHandler.enqueueCommand(this.bot, commandName, commandArgs)
+    this.bot.on('command', (commandName, commandArgs, username, origin) => {
+      if (origin !== this.gamemode) {
+        return
+      }
+
+      if (username in casinoManager.activeUsers) {
+        if (casinoManager.activeUsers[username].bot !== this.bot.username) {
+          this.bot.tell(username, 'You are playing a game!')
+          return
+        }
+      }
+
+      if (commandName !== 'invalid' && !username.match(/^\*/)) {
+        this.log(`Command $${commandName} run | ${commandArgs}`)
+        commandHandler.enqueueCommand(this, commandName, commandArgs, username)
       }
     })
   }
 
-  async joinSMP () {
-    await sleep(1000)
+  async joinGamemode (gamemode) {
+    if (gamemode === 'hub') {
+      this.bot.chat('/hub')
+      return
+    }
+
+    // await sleep(1000)
+
+    const grasBlockID = this.bot.registry.itemsByName.grass_block.id
+    const enderEyeID = this.bot.registry.itemsByName.ender_eye.id
+
+    const itemID = (gamemode === 'smp') ? grasBlockID : enderEyeID
+
     this.bot.activateItem(false) // right click the compass
-    this.bot.on('windowOpen', (window) => {
+    this.bot.once('windowOpen', (window) => {
       const items = window.containerItems()
 
       for (let i = 0; i < items.length; i++) {
-        if (items[i].type === 14) { // grass block
+        if (items[i].type === itemID) { // grass block
           this.bot.clickWindow(items[i].slot, 1, 0)
           this.bot.closeWindow(window)
         }
@@ -165,10 +231,26 @@ export default class CasinoBot {
   parseMessage (jsonMsg) {
     const rawMsg = jsonMsg.toString()
 
-    const commandMatch = rawMsg.match(/^From ✪?\[[^\]]+\] ([^:]+): \$(.+)\s*$/)
+    const commandMatch = rawMsg.match(/^From ✪?\[[^\]]+\] [^:]+: \$(.+)\s*$/)
     const chatMatch = rawMsg.match(/^\[[^\]]+\](?:.*?)? ✪?\[[^\]]+\] ([^:]+): (.+)$/)
     const tellMatch = rawMsg.match(/^From ✪?\[[^\]]+\] ([^:]+): (.+)\s*$/)
-    const payMatch = rawMsg.match(/\$(\d{1,3}(?:,\d{3})*) has been received from ✪?\[[^\]]+\] (.+)\.$/)
+    let originMatch
+
+    let origin = 'unknown'
+
+    if (typeof jsonMsg?.json?.extra?.[0]?.hoverEvent?.contents === 'string') {
+      originMatch = jsonMsg.json.extra[0].hoverEvent.contents.match(/§7Server: §f([a-zA-Z]*)/)
+      if (originMatch) {
+        origin = originMatch[1].toLowerCase()
+      }
+    }
+
+    let payMatch
+    if (this.gamemode === 'smp') {
+      payMatch = rawMsg.match(/\$(\d{1,3}(?:,\d{3})*) has been received from ✪?\[[^\]]+\] (.+)\.$/)
+    } else if (this.gamemode === 'rpg') {
+      payMatch = rawMsg.match(/\$(\d{1,3}(?:,\d{3})*) has been received from ✪?(.+)\.$/)
+    }
 
     // unhandled
     let event = 'unhandled'
@@ -180,7 +262,6 @@ export default class CasinoBot {
       username = chatMatch[1]
       content = chatMatch[2]
     } else if (tellMatch) {
-      console.log(rawMsg)
       event = 'tell'
       username = tellMatch[1]
       content = tellMatch[2]
@@ -191,30 +272,75 @@ export default class CasinoBot {
       username = payMatch[2]
       content = parseInt(payment.replace(/[^0-9]/g, ''))
     }
-    if (event !== 'unhandled') this.bot.emit(event, username, content) // trim spaces
+    if (event !== 'unhandled') this.bot.emit(event, username, content, origin, jsonMsg) // trim spaces
 
     if (commandMatch) {
-      const commandName = commandMatch[2].split(' ')[0].trim()
-      const commandArgs = commandMatch[2].split(' ').filter(arg => arg !== '')
-      commandArgs[0] = commandMatch[1]
+      const commandName = commandMatch[1].split(' ')[0].trim()
+      const commandArgs = commandMatch[1].split(' ').filter(arg => arg !== '')
+      commandArgs.shift()
 
       if (commandHandler.getCommand(commandName) === undefined) {
-        this.bot.emit('command', 'invalid')
+        this.bot.emit('command', 'invalid', [], username, origin)
       } else {
-        this.bot.emit('command', commandName, commandArgs)
+        this.bot.emit('command', commandName, commandArgs, username, origin)
       }
     }
   }
-  // emit crash event in command handler grin emoji
+
+  getBalance () {
+    const scoreboard = this.bot.scoreboard
+    for (const key in scoreboard['1'].itemsMap) {
+      const input = scoreboard['1'].itemsMap[key].displayName.toString()
+      const balMatch = input.match(/\$(\d{1,3}(?:,\d{3})*)/)
+      if (balMatch) {
+        return Math.floor(parseInt(balMatch[1].replace(/[^0-9]/g, '')))
+      }
+    }
+    console.error('Failed to get balance!')
+    return false
+  }
+
+  async getPing () {
+    return new Promise((resolve, reject) => {
+      this.bot.chat('/ping')
+      this.bot.once('message', (jsonMsg) => {
+        const rawMsg = jsonMsg.toString()
+        this.log(rawMsg)
+        const pingMatch = rawMsg.match(/^\[Ping\] Your ping is (\d+)ms/)
+        if (pingMatch) {
+          const ping = parseInt(pingMatch[1])
+          resolve(ping)
+        } else {
+          reject(new Error('Ping not found in message'))
+        }
+      })
+    })
+  }
 
   async makePayment (username, payment) {
     if (payment > 0) {
-      await jsonManager.editUser(username, 'add', 'balance', payment)
-      await jsonManager.editUser(username, 'add', 'paymentsSinceLastUpdate', payment)
+      await jsonManager.editUser(username, 'add', 'balance', payment, this.gamemode)
+      await jsonManager.editUser(username, 'add', 'paymentsSinceLastUpdate', payment, this.gamemode)
       this.bot.tell(username, `$${payment} has been added to your account`)
-      console.log(`${username} added $${payment} to their account`)
+      this.log(`${username} added $${payment} to their account`)
     } else {
       this.bot.tell(username, 'Please enter a valid payment!')
     }
+  }
+
+  log (message) {
+    const date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')
+
+    // Concatenate the date and username with padded spaces
+    const formattedDate = `[${date}]`
+    const formattedUsername = `[${this.bot.username}]`
+
+    // Set a fixed padding length based on the expected maximum length of the username
+    const paddingLength = 14 - formattedUsername.length
+
+    // Ensure paddingLength is not negative
+    const padding = paddingLength > 0 ? ' '.repeat(paddingLength) : ''
+
+    console.log(`${formattedDate} ${formattedUsername}${padding} | ${message}`)
   }
 }

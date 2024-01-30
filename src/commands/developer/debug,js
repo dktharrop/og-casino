@@ -1,0 +1,19 @@
+export default {
+  name: 'debug',
+  aliases: ['de', 'db'],
+  description: 'Debug info',
+  skipQueue: true,
+  devOnly: true,
+  execute: async (casinoBot, args, username) => {
+    casinoBot.bot.tell(username, 'disabled for now')
+    // print out any variables you want to debug
+    // example: $debug casinoBot.bot.gamemode prints out casinoBot.bot.gamemode
+
+    // if (!args[0]) {
+    //   casinoBot.bot.tell(username, 'Please enter valid arguments!')
+    //   return
+    // }
+
+    // casinoBot.bot.tell(username, eval(args[0]))
+  }
+}
