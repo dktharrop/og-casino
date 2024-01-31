@@ -151,10 +151,10 @@ export default class CasinoBot {
           }
         }
         if (message === 'l' || message.match(/leave/)) {
-          if (crashPlayer.state === 'playing' && this.crash.multiplier === 0) {
+          if (crashPlayer.state === 'joining') {
             crashPlayer.state = 'spectating'
             this.bot.tell(username, 'You are now spectating the next round!')
-          } else if (crashPlayer.state === 'playing' && this.crash.multiplier > 0) {
+          } else if (crashPlayer.state === 'playing') {
             this.bot.tell(username, 'You can\'t leave the game after it has started!')
           } else {
             this.bot.tell(username, 'You are already spectating!')
@@ -173,6 +173,10 @@ export default class CasinoBot {
           } else if (crashPlayer.state !== 'playing') {
             this.bot.tell(username, 'You are not playing this round!')
           } else {
+            if (this.crash.multiplier === 0) {
+              this.bot.tell(username, 'The game hasn\'t started yet!')
+              return
+            }
             this.log(`${username} claimed at ${this.crash.multiplier.toFixed(2)}x`)
             crashPlayer.state = 'claimed'
           }
